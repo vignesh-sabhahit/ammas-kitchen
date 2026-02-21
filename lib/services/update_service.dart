@@ -71,10 +71,14 @@ class UpdateService {
     try {
       final client = http.Client();
       final request = http.Request('GET', Uri.parse(downloadUrl));
-      final response = await client.send(request);
+      request.followRedirects = true;
+      request.maxRedirects = 5;
+      final response = await client.send(request)
+          .timeout(const Duration(minutes: 5));
 
       if (response.statusCode != 200) {
         client.close();
+        debugPrint('Download failed: HTTP ${response.statusCode} for $downloadUrl');
         return null;
       }
 
