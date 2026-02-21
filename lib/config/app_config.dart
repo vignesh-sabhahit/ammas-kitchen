@@ -3,10 +3,10 @@ class AppConfig {
   AppConfig._();
 
   /// Current app version (display string).
-  static const String currentVersion = '0.1.0';
+  static const String currentVersion = '0.2.0';
 
   /// Current version code (integer, bump this with every release).
-  static const int currentVersionCode = 1;
+  static const int currentVersionCode = 2;
 
   /// URL to check for updates.
   /// Host a JSON file here with the latest version info.
