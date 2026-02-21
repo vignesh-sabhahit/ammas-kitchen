@@ -21,8 +21,9 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -43,31 +44,20 @@ class DatabaseService {
         added_date TEXT NOT NULL,
         updated_date TEXT NOT NULL,
         status TEXT DEFAULT 'active',
-        notes TEXT
+        notes TEXT,
+        brand TEXT,
+        photo_paths TEXT
       )
     ''');
-
-    await db.execute('''
-      CREATE TABLE shelf_life_defaults (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        item_name TEXT NOT NULL,
-        category TEXT NOT NULL,
-        location TEXT DEFAULT 'fridge',
-        shelf_days INTEGER NOT NULL,
-        source TEXT DEFAULT 'custom'
-      )
-    ''');
-
-    // Seed shelf life defaults
-    await _seedShelfLifeData(db);
   }
 
-  Future<void> _seedShelfLifeData(Database db) async {
-    final batch = db.batch();
-    for (final entry in shelfLifeDefaults) {
-      batch.insert('shelf_life_defaults', entry);
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // v1 -> v2: Add brand and photo_paths columns, drop old shelf_life table
+      try { await db.execute('ALTER TABLE items ADD COLUMN brand TEXT'); } catch (_) {}
+      try { await db.execute('ALTER TABLE items ADD COLUMN photo_paths TEXT'); } catch (_) {}
+      try { await db.execute('DROP TABLE IF EXISTS shelf_life_defaults'); } catch (_) {}
     }
-    await batch.commit(noResult: true);
   }
 
   // --- Item CRUD ---
@@ -165,34 +155,75 @@ class DatabaseService {
     return maps.map((map) => InventoryItem.fromMap(map)).toList();
   }
 
-  // --- Shelf Life Defaults ---
+  // =========================================================================
+  // v2 SHELF LIFE LOOKUP — In-memory using ShelfLifeItem database
+  // No more SQL queries for shelf life — all 423 items loaded in memory
+  // =========================================================================
 
-  Future<int?> getShelfLifeDays(String itemName, String location) async {
-    final db = await database;
-    final maps = await db.query(
-      'shelf_life_defaults',
-      where: 'LOWER(item_name) = LOWER(?) AND LOWER(location) = LOWER(?)',
-      whereArgs: [itemName, location],
-    );
-    if (maps.isNotEmpty) {
-      return maps.first['shelf_days'] as int;
+  /// Find the best matching ShelfLifeItem for a given name.
+  /// Searches: exact name -> exact alias -> contains name -> contains alias
+  ShelfLifeItem? findShelfLifeItem(String itemName) {
+    final lower = itemName.toLowerCase().trim();
+    if (lower.isEmpty) return null;
+
+    // 1. Exact name match
+    for (final item in shelfLifeDatabase) {
+      if (item.name.toLowerCase() == lower) return item;
     }
-    // Try category-based fallback
+
+    // 2. Exact alias match
+    for (final item in shelfLifeDatabase) {
+      for (final alias in item.aliases) {
+        if (alias.toLowerCase() == lower) return item;
+      }
+    }
+
+    // 3. Name contains search term or search term contains name
+    for (final item in shelfLifeDatabase) {
+      final itemLower = item.name.toLowerCase();
+      if (itemLower.contains(lower) || lower.contains(itemLower)) {
+        return item;
+      }
+    }
+
+    // 4. Alias contains search term or search term contains alias
+    for (final item in shelfLifeDatabase) {
+      for (final alias in item.aliases) {
+        final aliasLower = alias.toLowerCase();
+        if (aliasLower.contains(lower) || lower.contains(aliasLower)) {
+          return item;
+        }
+      }
+    }
+
     return null;
   }
 
-  Future<int?> getShelfLifeDaysByCategory(
-      String category, String location) async {
-    final db = await database;
-    final maps = await db.query(
-      'shelf_life_defaults',
-      where:
-          'LOWER(item_name) = LOWER(?) AND LOWER(location) = LOWER(?)',
-      whereArgs: [category, location],
-    );
-    if (maps.isNotEmpty) {
-      return maps.first['shelf_days'] as int;
+  /// Get shelf life days for an item name + location (sync)
+  int? getShelfLifeDaysSync(String itemName, String location) {
+    final item = findShelfLifeItem(itemName);
+    if (item != null) {
+      return item.getShelfDays(location) ?? item.defaultShelfDays;
     }
     return null;
+  }
+
+  /// Get shelf life by category fallback (sync)
+  int? getShelfLifeByCategorySync(String category, String location) {
+    for (final def in categoryDefaults) {
+      if (def.name.toLowerCase() == category.toLowerCase()) {
+        return def.getShelfDays(location);
+      }
+    }
+    return null;
+  }
+
+  // Async wrappers for backward compatibility with v1 callers
+  Future<int?> getShelfLifeDays(String itemName, String location) async {
+    return getShelfLifeDaysSync(itemName, location);
+  }
+
+  Future<int?> getShelfLifeDaysByCategory(String category, String location) async {
+    return getShelfLifeByCategorySync(category, location);
   }
 }

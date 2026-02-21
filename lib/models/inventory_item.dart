@@ -14,6 +14,8 @@ class InventoryItem {
   final DateTime updatedDate;
   final String status; // active, used, expired, deleted
   final String? notes;
+  final String? brand;
+  final String? photoPaths; // comma-separated paths for multi-photo
 
   InventoryItem({
     this.id,
@@ -31,6 +33,8 @@ class InventoryItem {
     DateTime? updatedDate,
     this.status = 'active',
     this.notes,
+    this.brand,
+    this.photoPaths,
   })  : addedDate = addedDate ?? DateTime.now(),
         updatedDate = updatedDate ?? DateTime.now();
 
@@ -50,6 +54,17 @@ class InventoryItem {
     return ExpiryStatus.fresh;
   }
 
+  /// Get list of all photo paths (combines photoPath and photoPaths)
+  List<String> get allPhotoPaths {
+    final paths = <String>[];
+    if (photoPaths != null && photoPaths!.isNotEmpty) {
+      paths.addAll(photoPaths!.split(',').where((p) => p.isNotEmpty));
+    } else if (photoPath != null && photoPath!.isNotEmpty) {
+      paths.add(photoPath!);
+    }
+    return paths;
+  }
+
   Map<String, dynamic> toMap() {
     return {
       if (id != null) 'id': id,
@@ -67,6 +82,8 @@ class InventoryItem {
       'updated_date': updatedDate.toIso8601String(),
       'status': status,
       'notes': notes,
+      'brand': brand,
+      'photo_paths': photoPaths,
     };
   }
 
@@ -95,6 +112,8 @@ class InventoryItem {
           : DateTime.now(),
       status: map['status'] as String? ?? 'active',
       notes: map['notes'] as String?,
+      brand: map['brand'] as String?,
+      photoPaths: map['photo_paths'] as String?,
     );
   }
 
@@ -114,6 +133,8 @@ class InventoryItem {
     DateTime? updatedDate,
     String? status,
     String? notes,
+    String? brand,
+    String? photoPaths,
   }) {
     return InventoryItem(
       id: id ?? this.id,
@@ -131,6 +152,8 @@ class InventoryItem {
       updatedDate: updatedDate ?? DateTime.now(),
       status: status ?? this.status,
       notes: notes ?? this.notes,
+      brand: brand ?? this.brand,
+      photoPaths: photoPaths ?? this.photoPaths,
     );
   }
 }

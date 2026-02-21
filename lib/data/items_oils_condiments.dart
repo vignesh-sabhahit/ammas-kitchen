@@ -1,0 +1,48 @@
+import 'shelf_life_data.dart';
+
+/// ~20 Oils & Ghee items
+final List<ShelfLifeItem> oilItems = [
+  ShelfLifeItem(name: 'Sunflower Oil', aliases: ['sunflower oil', 'fortune sunflower', 'freedom sunflower', 'saffola gold', 'nature fresh sunflower'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, isPerishable: false, source: 'usda'),
+  ShelfLifeItem(name: 'Groundnut Oil', aliases: ['peanut oil', 'moongphali tel', 'shenga enne', 'nallennai', 'filtered groundnut oil'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Mustard Oil', aliases: ['sarson ka tel', 'kadugu enne', 'kadugu ennai', 'fortune mustard oil'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Coconut Oil', aliases: ['nariyal tel', 'kobbari enne', 'thengai ennai', 'parachute coconut oil', 'virgin coconut oil'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 0.5, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Sesame Oil', aliases: ['til ka tel', 'gingelly oil', 'nallennai', 'yellenne', 'sesame oil'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'ml', typicalQuantity: 500, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Olive Oil', aliases: ['olive oil', 'extra virgin olive oil', 'del monte olive oil', 'figaro olive oil', 'borges'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'ml', typicalQuantity: 500, isPerishable: false, source: 'usda'),
+  ShelfLifeItem(name: 'Rice Bran Oil', aliases: ['rice bran oil', 'fortune rice bran'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Saffola Oil', aliases: ['saffola', 'saffola total', 'saffola active', 'saffola gold'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, brand: 'Saffola', isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Fortune Oil', aliases: ['fortune', 'fortune soyabean', 'fortune refined', 'fortune sunlite'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, brand: 'Fortune', isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Vegetable Oil', aliases: ['refined oil', 'cooking oil', 'vanaspati', 'dalda'], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'L', typicalQuantity: 1, isPerishable: false, source: 'usda'),
+];
+
+/// ~35 Condiments & Sauces items
+final List<ShelfLifeItem> condimentItems = [
+  // --- Traditional Indian ---
+  ShelfLifeItem(name: 'Pickle', aliases: ['achar', 'uppinakaayi', 'oorugai', 'mango pickle', 'lime pickle', 'mixed pickle', 'priya pickle', 'mothers recipe pickle'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 300, openedShelfDays: 90, source: 'custom'),
+  ShelfLifeItem(name: 'Tamarind', aliases: ['imli', 'hunase hannu', 'puli', 'tamarind block', 'wet tamarind'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 730}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 200, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Tamarind Paste', aliases: ['imli paste', 'tamarind concentrate', 'tamicon'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 200, openedShelfDays: 60, source: 'custom'),
+  ShelfLifeItem(name: 'Papad', aliases: ['appalam', 'happala', 'papadum', 'lijjat papad', 'ganesh papad', 'urad papad', 'masala papad'], category: 'condiment', shelfDaysByLocation: {'pantry': 180}, defaultLocation: 'pantry', defaultUnit: 'packets', typicalQuantity: 1, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Coconut Chutney Powder', aliases: ['chutney pudi', 'coconut chutney powder', 'mtr chutney powder'], category: 'condiment', shelfDaysByLocation: {'pantry': 90}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 100, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Gun Powder', aliases: ['milagai podi', 'karam podi', 'idli podi', 'molaga podi', 'gun powder chutney'], category: 'condiment', shelfDaysByLocation: {'pantry': 90}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 100, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Honey', aliases: ['madhu', 'jenu', 'then', 'shahad', 'dabur honey', 'patanjali honey'], category: 'condiment', shelfDaysByLocation: {'pantry': 730}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 250, isPerishable: false, source: 'usda'),
+
+  // --- Sauces & Ketchup ---
+  ShelfLifeItem(name: 'Tomato Ketchup', aliases: ['ketchup', 'tomato sauce', 'kissan ketchup', 'maggi ketchup', 'del monte ketchup', 'heinz'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 500, openedShelfDays: 30, source: 'custom'),
+  ShelfLifeItem(name: 'Soy Sauce', aliases: ['soya sauce', 'chings soy sauce', 'ching\'s', 'kikkoman'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'ml', typicalQuantity: 200, openedShelfDays: 90, source: 'custom'),
+  ShelfLifeItem(name: 'Chilli Sauce', aliases: ['hot sauce', 'chilli sauce', 'maggi hot sweet', 'chings red chilli sauce', 'sriracha'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'ml', typicalQuantity: 200, openedShelfDays: 60, source: 'custom'),
+  ShelfLifeItem(name: 'Vinegar', aliases: ['sirka', 'vinegar', 'white vinegar', 'apple cider vinegar'], category: 'condiment', shelfDaysByLocation: {'pantry': 730}, defaultLocation: 'pantry', defaultUnit: 'ml', typicalQuantity: 500, isPerishable: false, source: 'usda'),
+  ShelfLifeItem(name: 'Mayonnaise', aliases: ['mayo', 'fun foods mayo', 'del monte mayo', 'veeba mayo', 'dr oetker mayo'], category: 'condiment', shelfDaysByLocation: {'fridge': 60}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 250, openedShelfDays: 30, source: 'custom'),
+  ShelfLifeItem(name: 'Mustard Sauce', aliases: ['mustard', 'yellow mustard', 'dijon mustard', 'fun foods mustard'], category: 'condiment', shelfDaysByLocation: {'fridge': 365}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 200, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Pasta Sauce', aliases: ['pasta sauce', 'del monte pasta sauce', 'prego', 'red sauce', 'arrabiata', 'marinara'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 7}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 400, openedShelfDays: 5, source: 'custom'),
+  ShelfLifeItem(name: 'Peanut Butter', aliases: ['peanut butter', 'sundrop peanut butter', 'pintola', 'myfitness peanut butter'], category: 'condiment', shelfDaysByLocation: {'pantry': 180}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 350, openedShelfDays: 90, source: 'custom'),
+  ShelfLifeItem(name: 'Jam', aliases: ['jam', 'kissan jam', 'mixed fruit jam', 'strawberry jam', 'kissan', 'mapro'], category: 'condiment', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 200, openedShelfDays: 30, source: 'custom'),
+
+  // --- Pastes ---
+  ShelfLifeItem(name: 'Ginger Garlic Paste', aliases: ['adrak lahsun paste', 'ginger garlic paste', 'smith jones ginger garlic', 'eastern paste'], category: 'condiment', shelfDaysByLocation: {'fridge': 30}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 200, openedShelfDays: 14, source: 'custom'),
+  ShelfLifeItem(name: 'Green Chutney', aliases: ['hari chutney', 'mint chutney', 'coriander chutney'], category: 'condiment', shelfDaysByLocation: {'fridge': 7}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 100, source: 'custom'),
+  ShelfLifeItem(name: 'Coconut Chutney', aliases: ['nariyal chutney', 'kobbari chutney', 'thengai chutney'], category: 'condiment', shelfDaysByLocation: {'fridge': 3}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 100, source: 'custom'),
+  ShelfLifeItem(name: 'Schezwan Sauce', aliases: ['schezwan', 'chings schezwan', 'schezwan chutney'], category: 'condiment', shelfDaysByLocation: {'fridge': 60}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 250, brand: "Ching's", openedShelfDays: 30, source: 'custom'),
+
+  // --- Branded condiments ---
+  ShelfLifeItem(name: 'Maggi Masala', aliases: ['maggi masala e magic', 'maggi magic masala', 'maggi bhuna masala'], category: 'condiment', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 65, brand: 'Maggi', isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Knorr Soup', aliases: ['knorr', 'knorr soup', 'knorr classic', 'instant soup'], category: 'condiment', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', defaultUnit: 'packets', typicalQuantity: 2, brand: 'Knorr', isPerishable: false, source: 'custom'),
+];

@@ -66,8 +66,52 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Photo
-            if (_item.photoPath != null)
+            // Photos (multi-photo support)
+            if (_item.allPhotoPaths.isNotEmpty)
+              SizedBox(
+                height: 250,
+                child: _item.allPhotoPaths.length == 1
+                    ? Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: FileImage(File(_item.allPhotoPaths.first)),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      )
+                    : PageView.builder(
+                        itemCount: _item.allPhotoPaths.length,
+                        itemBuilder: (context, index) {
+                          return Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.file(
+                                File(_item.allPhotoPaths[index]),
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                bottom: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    index == 0 ? 'Front' : 'Back',
+                                    style: const TextStyle(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+              )
+            else if (_item.photoPath != null)
               Container(
                 height: 250,
                 decoration: BoxDecoration(
@@ -176,6 +220,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       '${_item.quantity % 1 == 0 ? _item.quantity.toInt() : _item.quantity} ${_item.unit}'),
                   _buildDetailRow('Location',
                       '${locationIcons[_item.storageLocation] ?? ''} ${_item.storageLocation[0].toUpperCase()}${_item.storageLocation.substring(1)}'),
+                  if (_item.brand != null && _item.brand!.isNotEmpty)
+                    _buildDetailRow('Brand', _item.brand!),
                   _buildDetailRow('Added',
                       DateFormat('dd MMM yyyy, h:mm a').format(_item.addedDate)),
                   if (_item.notes != null && _item.notes!.isNotEmpty)

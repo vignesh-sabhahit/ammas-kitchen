@@ -1,0 +1,34 @@
+import 'shelf_life_data.dart';
+
+/// ~15 Frozen Food items
+final List<ShelfLifeItem> frozenItems = [
+  ShelfLifeItem(name: 'Frozen Peas', aliases: ['frozen peas', 'safal peas', 'frozen matar', 'green peas frozen'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'g', typicalQuantity: 500, brand: 'Safal', source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Sweet Corn', aliases: ['frozen corn', 'safal corn', 'frozen sweet corn'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'g', typicalQuantity: 500, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Mixed Vegetables', aliases: ['mixed vegetables', 'safal mixed veg', 'frozen veg mix'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'g', typicalQuantity: 500, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Paratha', aliases: ['frozen paratha', 'mccain paratha', 'haldiram paratha', 'ready to cook paratha', 'aloo paratha frozen', 'id paratha'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'packets', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Samosa', aliases: ['frozen samosa', 'mccain samosa', 'haldiram samosa', 'ready to fry samosa'], category: 'frozen', shelfDaysByLocation: {'freezer': 120}, defaultLocation: 'freezer', defaultUnit: 'packets', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen French Fries', aliases: ['french fries', 'mccain fries', 'mccain french fries', 'aloo fries', 'frozen fries'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'g', typicalQuantity: 450, brand: 'McCain', source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Pizza', aliases: ['frozen pizza', 'dr oetker pizza', 'mccain pizza'], category: 'frozen', shelfDaysByLocation: {'freezer': 180}, defaultLocation: 'freezer', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Chapati', aliases: ['frozen roti', 'frozen chapati', 'id roti', 'ready roti'], category: 'frozen', shelfDaysByLocation: {'freezer': 90}, defaultLocation: 'freezer', defaultUnit: 'packets', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Paneer Tikka', aliases: ['frozen paneer', 'ready to eat paneer', 'frozen paneer tikka'], category: 'frozen', shelfDaysByLocation: {'freezer': 90}, defaultLocation: 'freezer', defaultUnit: 'packets', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Frozen Spring Roll', aliases: ['spring roll', 'frozen spring roll', 'veg spring roll'], category: 'frozen', shelfDaysByLocation: {'freezer': 90}, defaultLocation: 'freezer', defaultUnit: 'packets', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Ice Cream', aliases: ['ice cream', 'amul ice cream', 'kwality walls', 'baskin robbins', 'cream bell', 'naturals ice cream', 'havmor'], category: 'frozen', shelfDaysByLocation: {'freezer': 90}, defaultLocation: 'freezer', defaultUnit: 'L', typicalQuantity: 0.5, source: 'custom'),
+  ShelfLifeItem(name: 'Kulfi', aliases: ['kulfi', 'matka kulfi', 'amul kulfi'], category: 'frozen', shelfDaysByLocation: {'freezer': 60}, defaultLocation: 'freezer', defaultUnit: 'pieces', typicalQuantity: 4, source: 'custom'),
+];
+
+/// ~15 Homemade / Fresh items (no packaging, no OCR - shelf life is critical)
+final List<ShelfLifeItem> homemadeItems = [
+  ShelfLifeItem(name: 'Cooked Rice', aliases: ['leftover rice', 'anna', 'bhaat', 'cooked rice'], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 30}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Cooked Dal', aliases: ['leftover dal', 'sambar leftover', 'cooked dal'], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 14}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Cooked Curry', aliases: ['leftover curry', 'sabzi', 'cooked vegetable', 'palya'], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 14}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Homemade Dosa Batter', aliases: ['dosa batter homemade', 'idli batter homemade', 'hittu'], category: 'homemade', shelfDaysByLocation: {'fridge': 4, 'freezer': 30}, defaultLocation: 'fridge', defaultUnit: 'L', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Chapati Dough', aliases: ['atta dough', 'roti dough', 'chapati dough'], category: 'homemade', shelfDaysByLocation: {'fridge': 2}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Cut Fruits', aliases: ['cut fruits', 'fruit salad', 'sliced fruits'], category: 'homemade', shelfDaysByLocation: {'fridge': 2}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Cut Vegetables', aliases: ['chopped vegetables', 'prepped veggies', 'cut vegetables'], category: 'homemade', shelfDaysByLocation: {'fridge': 2}, defaultLocation: 'fridge', defaultUnit: 'pieces', typicalQuantity: 1, source: 'custom'),
+  ShelfLifeItem(name: 'Homemade Pickle', aliases: ['ghar ka achar', 'mane uppinakaayi', 'homemade pickle'], category: 'homemade', shelfDaysByLocation: {'pantry': 365, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 500, source: 'custom'),
+  ShelfLifeItem(name: 'Homemade Ghee', aliases: ['ghar ka ghee', 'mane tuppa', 'homemade ghee'], category: 'homemade', shelfDaysByLocation: {'pantry': 180, 'fridge': 365}, defaultLocation: 'pantry', defaultUnit: 'g', typicalQuantity: 500, isPerishable: false, source: 'custom'),
+  ShelfLifeItem(name: 'Sprouted Lentils', aliases: ['sprouts', 'ankurit', 'moong sprouts', 'kosambari'], category: 'homemade', shelfDaysByLocation: {'fridge': 3}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 200, source: 'custom'),
+  ShelfLifeItem(name: 'Grated Coconut', aliases: ['fresh coconut grated', 'coconut gratings', 'kobbari thurupu'], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 30}, defaultLocation: 'fridge', defaultUnit: 'g', typicalQuantity: 100, source: 'custom'),
+  ShelfLifeItem(name: 'Homemade Sweets', aliases: ['ladoo', 'laddu', 'halwa', 'barfi', 'mysorepak', 'holige', 'modak'], category: 'homemade', shelfDaysByLocation: {'pantry': 5, 'fridge': 10}, defaultLocation: 'pantry', defaultUnit: 'pieces', typicalQuantity: 10, source: 'custom'),
+  ShelfLifeItem(name: 'Coconut Milk Fresh', aliases: ['fresh coconut milk', 'homemade coconut milk', 'thengai paal'], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 30}, defaultLocation: 'fridge', defaultUnit: 'ml', typicalQuantity: 200, source: 'custom'),
+];

@@ -9,6 +9,7 @@ import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart
 import 'package:ammas_kitchen/models/inventory_item.dart';
 import 'package:ammas_kitchen/providers/inventory_provider.dart';
 import 'package:ammas_kitchen/services/database_service.dart';
+import 'package:ammas_kitchen/services/smart_identifier.dart';
 import 'package:ammas_kitchen/data/shelf_life_data.dart';
 import 'package:intl/intl.dart';
 
@@ -23,17 +24,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _nameController = TextEditingController();
   final _notesController = TextEditingController();
   final _imagePicker = ImagePicker();
+  final _identifier = SmartIdentifier.instance;
 
-  String? _photoPath;
+  // Multi-photo support
+  final List<String> _photoPaths = [];
+  final List<String> _ocrTexts = [];
+
   String _category = 'other';
   double _quantity = 1;
   String _unit = 'pieces';
   String _storageLocation = 'fridge';
   DateTime? _expiryDate;
+  DateTime? _mfgDate;
   bool _isProcessing = false;
-  String? _aiSuggestion;
-  List<String> _detectedLabels = [];
-  String? _detectedExpiryText;
+
+  // v2 identification results
+  List<IdentificationResult> _identificationResults = [];
+  PackagingInfo? _packagingInfo;
+  String? _detectedBrand;
+  List<String> _mlLabels = []; // fallback ML Kit labels
+
+  @override
+  void initState() {
+    super.initState();
+    _identifier.initialize();
+  }
 
   @override
   void dispose() {
@@ -62,7 +77,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 children: [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Identifying your item...', style: TextStyle(fontSize: 16)),
+                  Text('Scanning your item...', style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 8),
+                  Text('Reading text & identifying product',
+                      style: TextStyle(fontSize: 13, color: Colors.grey)),
                 ],
               ),
             )
@@ -71,12 +89,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Photo section
-                  _buildPhotoSection(),
+                  // Multi-photo section
+                  _buildMultiPhotoSection(),
                   const SizedBox(height: 20),
 
-                  // AI suggestion banner
-                  if (_aiSuggestion != null) _buildAiSuggestion(),
+                  // Identification results banner
+                  if (_identificationResults.isNotEmpty) _buildIdentificationBanner(),
+
+                  // Packaging info banner
+                  if (_packagingInfo != null) _buildPackagingInfoBanner(),
 
                   // Name field
                   TextField(
@@ -127,62 +148,232 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  Widget _buildPhotoSection() {
-    return GestureDetector(
-      onTap: _showImageSourceDialog,
-      child: Container(
-        height: 200,
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey[300]!),
-          image: _photoPath != null
-              ? DecorationImage(
-                  image: FileImage(File(_photoPath!)),
-                  fit: BoxFit.cover,
-                )
-              : null,
-        ),
-        child: _photoPath == null
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.camera_alt, size: 48, color: Colors.grey[400]),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap to take a photo',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 16,
+  // =========================================================================
+  // MULTI-PHOTO SECTION
+  // =========================================================================
+
+  Widget _buildMultiPhotoSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Photo grid
+        SizedBox(
+          height: 160,
+          child: Row(
+            children: [
+              // Existing photos
+              ..._photoPaths.asMap().entries.map((entry) {
+                final idx = entry.key;
+                final path = entry.value;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(right: idx < _photoPaths.length - 1 ? 8 : 0),
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            image: DecorationImage(
+                              image: FileImage(File(path)),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        // Label: Front / Back
+                        Positioned(
+                          top: 6,
+                          left: 6,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              idx == 0 ? '📷 Front' : '📷 Back',
+                              style: const TextStyle(color: Colors.white, fontSize: 11),
+                            ),
+                          ),
+                        ),
+                        // Remove button
+                        Positioned(
+                          top: 4,
+                          right: 4,
+                          child: GestureDetector(
+                            onTap: () => _removePhoto(idx),
+                            child: const CircleAvatar(
+                              radius: 14,
+                              backgroundColor: Colors.black54,
+                              child: Icon(Icons.close, size: 16, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    'AI will identify the item for you',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              )
-            : Align(
-                alignment: Alignment.bottomRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black54,
-                    child: IconButton(
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      onPressed: _showImageSourceDialog,
+                );
+              }),
+
+              // Add photo button (if < 2 photos)
+              if (_photoPaths.length < 2) ...[
+                if (_photoPaths.isNotEmpty) const SizedBox(width: 8),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: _showImageSourceDialog,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey[300]!, width: 2, strokeAlign: BorderSide.strokeAlignInside),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            _photoPaths.isEmpty ? Icons.camera_alt : Icons.flip_camera_android,
+                            size: 40,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _photoPaths.isEmpty
+                                ? 'Take a photo'
+                                : 'Add back side',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          if (_photoPaths.isEmpty)
+                            Text(
+                              'Front of the package',
+                              style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                            ),
+                          if (_photoPaths.length == 1)
+                            Text(
+                              'For expiry/MFG date',
+                              style: TextStyle(color: Colors.grey[400], fontSize: 11),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
+              ],
+            ],
+          ),
+        ),
+
+        // Tip text
+        if (_photoPaths.isEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              '💡 Tip: Take front photo first, then back for expiry dates',
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // =========================================================================
+  // IDENTIFICATION RESULTS BANNER
+  // =========================================================================
+
+  Widget _buildIdentificationBanner() {
+    final topResult = _identificationResults.first;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: topResult.confidence > 0.7 ? Colors.green[50] : Colors.orange[50],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: topResult.confidence > 0.7 ? Colors.green[200]! : Colors.orange[200]!,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                topResult.confidence > 0.7 ? '✅' : '🔍',
+                style: const TextStyle(fontSize: 18),
               ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Identified: ${topResult.item.name}',
+                  style: TextStyle(
+                    color: topResult.confidence > 0.7 ? Colors.green[800] : Colors.orange[800],
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: topResult.confidence > 0.7 ? Colors.green[100] : Colors.orange[100],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  topResult.confidenceLabel,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: topResult.confidence > 0.7 ? Colors.green[700] : Colors.orange[700],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_detectedBrand != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Brand: $_detectedBrand',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+          // Alternative suggestions
+          if (_identificationResults.length > 1) ...[
+            const SizedBox(height: 8),
+            const Text('Did you mean:', style: TextStyle(fontSize: 12, color: Colors.grey)),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: _identificationResults.skip(1).take(4).map((result) {
+                return ActionChip(
+                  label: Text(
+                    '${categoryIcons[result.item.category] ?? ''} ${result.item.name}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  onPressed: () => _selectIdentification(result),
+                );
+              }).toList(),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildAiSuggestion() {
+  // =========================================================================
+  // PACKAGING INFO BANNER
+  // =========================================================================
+
+  Widget _buildPackagingInfoBanner() {
+    final info = _packagingInfo!;
+    final hasUsefulInfo = info.expiryDate != null ||
+        info.mfgDate != null ||
+        info.mrp != null ||
+        info.netWeight != null;
+
+    if (!hasUsefulInfo) return const SizedBox.shrink();
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
@@ -196,44 +387,51 @@ class _AddItemScreenState extends State<AddItemScreen> {
         children: [
           Row(
             children: [
-              const Text('🤖', style: TextStyle(fontSize: 18)),
+              const Text('📋', style: TextStyle(fontSize: 16)),
               const SizedBox(width: 8),
-              Text(
-                'AI detected: $_aiSuggestion',
-                style: TextStyle(
-                  color: Colors.blue[800],
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text('Package Info',
+                  style: TextStyle(
+                      color: Colors.blue[800], fontWeight: FontWeight.w600)),
             ],
           ),
-          if (_detectedLabels.length > 1) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 6,
-              children: _detectedLabels.take(5).map((label) {
-                return ActionChip(
-                  label: Text(label, style: const TextStyle(fontSize: 12)),
-                  onPressed: () {
-                    _nameController.text = label;
-                    _guessCategory(label);
-                    setState(() {});
-                  },
-                );
-              }).toList(),
-            ),
-          ],
-          if (_detectedExpiryText != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Detected date text: "$_detectedExpiryText"',
-              style: TextStyle(color: Colors.blue[600], fontSize: 12),
-            ),
-          ],
+          const SizedBox(height: 8),
+          if (info.expiryDate != null)
+            _infoRow('Expiry', DateFormat('dd MMM yyyy').format(info.expiryDate!),
+                info.expiryDateRaw),
+          if (info.mfgDate != null)
+            _infoRow('MFG Date', DateFormat('dd MMM yyyy').format(info.mfgDate!),
+                info.mfgDateRaw),
+          if (info.mrp != null) _infoRow('MRP', '₹${info.mrp}', null),
+          if (info.netWeight != null)
+            _infoRow('Net Weight', info.netWeight!, null),
         ],
       ),
     );
   }
+
+  Widget _infoRow(String label, String value, String? raw) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 80,
+            child: Text(label,
+                style: TextStyle(color: Colors.blue[600], fontSize: 12)),
+          ),
+          Text(value,
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13)),
+          if (raw != null)
+            Text(' (from: "$raw")',
+                style: TextStyle(color: Colors.grey[400], fontSize: 10)),
+        ],
+      ),
+    );
+  }
+
+  // =========================================================================
+  // CATEGORY, QUANTITY, LOCATION, EXPIRY BUILDERS (same as v1, with updates)
+  // =========================================================================
 
   Widget _buildCategorySelector() {
     return Column(
@@ -248,8 +446,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
           children: categoryNames.entries.map((entry) {
             final isSelected = _category == entry.key;
             return ChoiceChip(
-              label: Text(
-                  '${categoryIcons[entry.key] ?? ''} ${entry.value}'),
+              label:
+                  Text('${categoryIcons[entry.key] ?? ''} ${entry.value}'),
               selected: isSelected,
               onSelected: (_) => setState(() => _category = entry.key),
             );
@@ -262,15 +460,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget _buildQuantitySection() {
     return Row(
       children: [
-        // Quantity stepper
         Expanded(
           flex: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Quantity',
-                  style:
-                      TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -298,16 +494,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ],
           ),
         ),
-
-        // Unit selector
         Expanded(
           flex: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text('Unit',
-                  style:
-                      TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 initialValue: _unit,
@@ -346,8 +539,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 '${locationIcons[location] ?? ''} ${location[0].toUpperCase()}${location.substring(1)}',
               ),
               selected: isSelected,
-              onSelected: (_) =>
-                  setState(() => _storageLocation = location),
+              onSelected: (_) => setState(() => _storageLocation = location),
             );
           }).toList(),
         ),
@@ -365,7 +557,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
         InkWell(
           onTap: _pickExpiryDate,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey[400]!),
               borderRadius: BorderRadius.circular(4),
@@ -406,7 +599,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  // --- Actions ---
+  // =========================================================================
+  // ACTIONS
+  // =========================================================================
 
   void _showImageSourceDialog() {
     showModalBottomSheet(
@@ -416,7 +611,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt),
-              title: const Text('Take Photo'),
+              title: Text(_photoPaths.isEmpty
+                  ? 'Take Photo (Front)'
+                  : 'Take Photo (Back)'),
+              subtitle: Text(_photoPaths.isEmpty
+                  ? 'Product name & brand side'
+                  : 'Expiry date & MFG date side'),
               onTap: () {
                 Navigator.pop(ctx);
                 _captureImage(ImageSource.camera);
@@ -454,7 +654,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       await File(image.path).copy(savedPath);
 
       setState(() {
-        _photoPath = savedPath;
+        _photoPaths.add(savedPath);
         _isProcessing = true;
       });
 
@@ -469,50 +669,142 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
+  void _removePhoto(int index) {
+    setState(() {
+      _photoPaths.removeAt(index);
+      if (index < _ocrTexts.length) _ocrTexts.removeAt(index);
+      // Re-run identification with remaining photos
+      _reprocessAllPhotos();
+    });
+  }
+
+  // =========================================================================
+  // v2 IMAGE PROCESSING — OCR-first, then fuzzy match
+  // =========================================================================
+
   Future<void> _processImage(String imagePath) async {
     try {
       final inputImage = InputImage.fromFilePath(imagePath);
 
-      // Run image labeling and text recognition in parallel
+      // Run OCR and ML Kit labels in parallel
+      final textFuture = _detectAllText(inputImage);
       final labelFuture = _detectLabels(inputImage);
-      final textFuture = _detectText(inputImage);
 
-      final results = await Future.wait([labelFuture, textFuture]);
-      final labels = results[0] as List<String>;
-      final detectedText = results[1] as String?;
+      final results = await Future.wait([textFuture, labelFuture]);
+      final ocrText = results[0] as String;
+      final labels = results[1] as List<String>;
 
-      setState(() {
-        _isProcessing = false;
-        _detectedLabels = labels;
+      _ocrTexts.add(ocrText);
+      _mlLabels = labels;
 
-        if (labels.isNotEmpty) {
-          _aiSuggestion = labels.first;
-          _nameController.text = labels.first;
-          _guessCategory(labels.first);
-        }
+      // Now run smart identification on ALL collected OCR text
+      _runSmartIdentification();
 
-        if (detectedText != null) {
-          _detectedExpiryText = detectedText;
-          _tryParseExpiryDate(detectedText);
-        }
-      });
-
-      // Try to auto-suggest shelf life
-      _suggestShelfLife();
+      setState(() => _isProcessing = false);
     } catch (e) {
       setState(() => _isProcessing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Couldn't identify the item. Please enter the name manually."),
+            content: Text(
+                "Couldn't read the image. Please enter the name manually."),
           ),
         );
       }
     }
   }
 
+  void _reprocessAllPhotos() {
+    if (_ocrTexts.isEmpty) {
+      _identificationResults = [];
+      _packagingInfo = null;
+      _detectedBrand = null;
+      return;
+    }
+    _runSmartIdentification();
+  }
+
+  void _runSmartIdentification() {
+    // Combine all OCR text from all photos
+    final combinedText = _ocrTexts.join('\n');
+
+    // 1. Extract packaging info (expiry, MFG, MRP, brand, weight)
+    _packagingInfo = _identifier.mergePackagingInfo(_ocrTexts);
+
+    // 2. Run fuzzy matching against 423-item database
+    _identificationResults = _identifier.identifyFromOCR(combinedText);
+
+    // 3. If OCR didn't find anything, try ML Kit labels as fallback
+    if (_identificationResults.isEmpty && _mlLabels.isNotEmpty) {
+      for (final label in _mlLabels) {
+        final labelResults = _identifier.identifyFromOCR(label);
+        if (labelResults.isNotEmpty) {
+          _identificationResults = labelResults;
+          break;
+        }
+      }
+    }
+
+    // 4. Apply the best match
+    if (_identificationResults.isNotEmpty) {
+      _selectIdentification(_identificationResults.first);
+    }
+
+    // 5. Apply packaging info
+    _detectedBrand = _packagingInfo?.brand;
+
+    if (_packagingInfo?.expiryDate != null && _expiryDate == null) {
+      _expiryDate = _packagingInfo!.expiryDate;
+    }
+    if (_packagingInfo?.mfgDate != null) {
+      _mfgDate = _packagingInfo!.mfgDate;
+    }
+
+    setState(() {});
+  }
+
+  /// Select an identification result and auto-fill the form
+  void _selectIdentification(IdentificationResult result) {
+    final item = result.item;
+
+    _nameController.text = item.name;
+    _category = item.category;
+    _storageLocation = item.defaultLocation;
+    _unit = item.defaultUnit;
+    _quantity = item.typicalQuantity;
+
+    if (item.brand != null) {
+      _detectedBrand = item.brand;
+    }
+
+    // Auto-set expiry from shelf life if not already set from OCR
+    if (_expiryDate == null && item.isPerishable) {
+      final days = item.defaultShelfDays;
+      _expiryDate = DateTime.now().add(Duration(days: days));
+    }
+
+    setState(() {});
+  }
+
+  // =========================================================================
+  // OCR & ML KIT
+  // =========================================================================
+
+  /// Detect ALL text from image (not just dates — everything)
+  Future<String> _detectAllText(InputImage inputImage) async {
+    final recognizer = TextRecognizer();
+    try {
+      final recognized = await recognizer.processImage(inputImage);
+      return recognized.text;
+    } finally {
+      recognizer.close();
+    }
+  }
+
+  /// ML Kit image labeling as fallback
   Future<List<String>> _detectLabels(InputImage inputImage) async {
-    final labeler = ImageLabeler(options: ImageLabelerOptions(confidenceThreshold: 0.5));
+    final labeler = ImageLabeler(
+        options: ImageLabelerOptions(confidenceThreshold: 0.5));
     try {
       final labels = await labeler.processImage(inputImage);
       return labels.map((l) => l.label).toList();
@@ -521,106 +813,47 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
-  Future<String?> _detectText(InputImage inputImage) async {
-    final recognizer = TextRecognizer();
-    try {
-      final recognized = await recognizer.processImage(inputImage);
-      final text = recognized.text;
-      if (text.isEmpty) return null;
-
-      // Look for date-like patterns
-      final datePatterns = [
-        RegExp(r'(?:exp(?:iry)?|best before|bb|use by)[:\s]*(.+)', caseSensitive: false),
-        RegExp(r'(\d{1,2}[/\-\.]\d{1,2}[/\-\.]\d{2,4})'),
-        RegExp(r'(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\w*\s+\d{2,4})', caseSensitive: false),
-      ];
-
-      for (final pattern in datePatterns) {
-        final match = pattern.firstMatch(text);
-        if (match != null) {
-          return match.group(1)?.trim() ?? match.group(0)?.trim();
-        }
-      }
-
-      return null;
-    } finally {
-      recognizer.close();
-    }
-  }
-
-  void _tryParseExpiryDate(String text) {
-    // Try various Indian date formats
-    final formats = [
-      DateFormat('dd/MM/yyyy'),
-      DateFormat('dd-MM-yyyy'),
-      DateFormat('dd.MM.yyyy'),
-      DateFormat('MM/yyyy'),
-      DateFormat('MM-yyyy'),
-      DateFormat('dd MMM yyyy'),
-      DateFormat('MMM yyyy'),
-      DateFormat('dd/MM/yy'),
-      DateFormat('dd-MM-yy'),
-    ];
-
-    for (final format in formats) {
-      try {
-        final date = format.parseStrict(text.trim());
-        // Sanity check: should be in the future or recent past
-        if (date.isAfter(DateTime(2020))) {
-          setState(() => _expiryDate = date);
-          return;
-        }
-      } catch (_) {}
-    }
-  }
-
-  void _guessCategory(String name) {
-    final lower = name.toLowerCase();
-    final categoryGuess = {
-      'vegetable': ['tomato', 'onion', 'potato', 'carrot', 'beans', 'capsicum', 'brinjal', 'cauliflower', 'cabbage', 'spinach', 'methi', 'coriander', 'curry', 'chilli', 'ginger', 'garlic', 'drumstick', 'gourd', 'bhindi', 'okra', 'ladies finger', 'beetroot', 'radish', 'peas', 'mushroom', 'cucumber'],
-      'fruit': ['banana', 'apple', 'mango', 'papaya', 'grapes', 'orange', 'pomegranate', 'guava', 'coconut', 'lemon', 'watermelon', 'sapota', 'pineapple', 'strawberry', 'fig', 'dates'],
-      'dairy': ['milk', 'curd', 'yogurt', 'paneer', 'butter', 'cheese', 'ghee', 'cream', 'buttermilk', 'egg', 'amul'],
-      'grain': ['rice', 'wheat', 'flour', 'rava', 'poha', 'dal', 'lentil', 'rajma', 'chana', 'besan', 'ragi', 'vermicelli', 'noodle', 'pasta', 'oats', 'idli'],
-      'spice': ['turmeric', 'chilli powder', 'coriander powder', 'cumin', 'mustard', 'garam masala', 'sambar', 'rasam', 'asafoetida', 'pepper', 'cardamom', 'cloves', 'cinnamon', 'bay leaf', 'fenugreek'],
-      'beverage': ['juice', 'soda', 'water', 'tea', 'coffee'],
-    };
-
-    for (final entry in categoryGuess.entries) {
-      for (final keyword in entry.value) {
-        if (lower.contains(keyword)) {
-          setState(() => _category = entry.key);
-          // Auto-suggest storage location
-          if (entry.key == 'dairy' || entry.key == 'vegetable' || entry.key == 'fruit') {
-            _storageLocation = 'fridge';
-          } else if (entry.key == 'grain' || entry.key == 'spice') {
-            _storageLocation = 'pantry';
-          }
-          return;
-        }
-      }
-    }
-  }
+  // =========================================================================
+  // SHELF LIFE & SAVE
+  // =========================================================================
 
   Future<void> _suggestShelfLife() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
 
     final db = DatabaseService.instance;
-    var days = await db.getShelfLifeDays(name, _storageLocation);
-    days ??= await db.getShelfLifeDaysByCategory(_category, _storageLocation);
+    final item = db.findShelfLifeItem(name);
 
-    if (days != null && mounted) {
+    if (item != null && mounted) {
+      final days =
+          item.getShelfDays(_storageLocation) ?? item.defaultShelfDays;
       final suggestedDate = DateTime.now().add(Duration(days: days));
       if (_expiryDate == null) {
         setState(() => _expiryDate = suggestedDate);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              '$name typically lasts $days days in $_storageLocation. Expiry set to ${DateFormat('dd MMM').format(suggestedDate)}.',
+              '${item.name} typically lasts $days days in $_storageLocation. Expiry set to ${DateFormat('dd MMM').format(suggestedDate)}.',
             ),
             duration: const Duration(seconds: 3),
           ),
         );
+      }
+    } else {
+      // Fallback to category default
+      final days = db.getShelfLifeByCategorySync(_category, _storageLocation);
+      if (days != null && mounted) {
+        final suggestedDate = DateTime.now().add(Duration(days: days));
+        if (_expiryDate == null) {
+          setState(() => _expiryDate = suggestedDate);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Using default shelf life for $_category: $days days. Expiry set to ${DateFormat('dd MMM').format(suggestedDate)}.',
+              ),
+            ),
+          );
+        }
       }
     }
   }
@@ -628,7 +861,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Future<void> _pickExpiryDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _expiryDate ?? DateTime.now().add(const Duration(days: 7)),
+      initialDate:
+          _expiryDate ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
     );
@@ -647,9 +881,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
       quantity: _quantity,
       unit: _unit,
       storageLocation: _storageLocation,
-      photoPath: _photoPath,
+      photoPath: _photoPaths.isNotEmpty ? _photoPaths.first : null,
       expiryDate: _expiryDate,
-      isPerishable: _category != 'spice' && _category != 'grain',
+      mfgDate: _mfgDate,
+      isPerishable: !['spice', 'dryfruits', 'oil'].contains(_category),
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -661,7 +896,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (!mounted) return;
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$name added to your kitchen!')),
+      SnackBar(content: Text('$name added to your kitchen! 🍳')),
     );
   }
 }

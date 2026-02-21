@@ -197,7 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         children: [
           // Location filters
-          ...['fridge', 'freezer', 'pantry', 'shelf'].map((location) {
+          ...['fridge', 'freezer', 'pantry', 'countertop'].map((location) {
             final isSelected = provider.filterLocation == location;
             return Padding(
               padding: const EdgeInsets.only(right: 8),

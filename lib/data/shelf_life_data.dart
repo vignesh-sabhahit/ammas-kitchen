@@ -1,139 +1,90 @@
-/// Default shelf life data for common Indian grocery items.
-/// Each entry: item_name, category, location (fridge/pantry/freezer), shelf_days, source
-final List<Map<String, dynamic>> shelfLifeDefaults = [
-  // === VEGETABLES ===
-  {'item_name': 'Tomato', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 7, 'source': 'custom'},
-  {'item_name': 'Tomato', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 3, 'source': 'custom'},
-  {'item_name': 'Onion', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 30, 'source': 'usda'},
-  {'item_name': 'Potato', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Carrot', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 14, 'source': 'usda'},
-  {'item_name': 'Beans', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Capsicum', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 7, 'source': 'custom'},
-  {'item_name': 'Brinjal', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Cauliflower', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 7, 'source': 'usda'},
-  {'item_name': 'Cabbage', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 14, 'source': 'usda'},
-  {'item_name': 'Spinach', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'usda'},
-  {'item_name': 'Methi', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 4, 'source': 'custom'},
-  {'item_name': 'Coriander', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 7, 'source': 'custom'},
-  {'item_name': 'Curry Leaves', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 10, 'source': 'custom'},
-  {'item_name': 'Green Chilli', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 10, 'source': 'custom'},
-  {'item_name': 'Ginger', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Garlic', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 30, 'source': 'usda'},
-  {'item_name': 'Drumstick', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Bitter Gourd', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Bottle Gourd', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 7, 'source': 'custom'},
-  {'item_name': 'Ridge Gourd', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Ladies Finger', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 4, 'source': 'custom'},
-  {'item_name': 'Beetroot', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 14, 'source': 'usda'},
-  {'item_name': 'Radish', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 10, 'source': 'usda'},
-  {'item_name': 'Peas', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Sweet Potato', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 14, 'source': 'usda'},
-  {'item_name': 'Mushroom', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'usda'},
+// v2 Shelf Life Database for Amma's Kitchen
+// ~500 items covering Indian vegetarian + egg household items
+// Each item has aliases (English, Hindi, Kannada, brand names) for OCR fuzzy matching
 
-  // === FRUITS ===
-  {'item_name': 'Banana', 'category': 'fruit', 'location': 'pantry', 'shelf_days': 5, 'source': 'usda'},
-  {'item_name': 'Apple', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Mango', 'category': 'fruit', 'location': 'pantry', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Mango', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 10, 'source': 'custom'},
-  {'item_name': 'Papaya', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Grapes', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 7, 'source': 'usda'},
-  {'item_name': 'Orange', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 14, 'source': 'usda'},
-  {'item_name': 'Pomegranate', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 14, 'source': 'custom'},
-  {'item_name': 'Guava', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
-  {'item_name': 'Coconut', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 14, 'source': 'custom'},
-  {'item_name': 'Lemon', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Watermelon', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 5, 'source': 'usda'},
-  {'item_name': 'Sapota', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 5, 'source': 'custom'},
+// Category item files
+import 'items_vegetables.dart';
+import 'items_fruits.dart';
+import 'items_dairy.dart';
+import 'items_grains.dart';
+import 'items_spices.dart';
+import 'items_oils_condiments.dart';
+import 'items_packaged.dart';
+import 'items_beverages.dart';
+import 'items_snacks_bakery.dart';
+import 'items_dryfruits.dart';
+import 'items_frozen_homemade.dart';
+import 'items_extras.dart';
 
-  // === DAIRY ===
-  {'item_name': 'Milk', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 4, 'source': 'usda'},
-  {'item_name': 'Curd', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 7, 'source': 'custom'},
-  {'item_name': 'Paneer', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 4, 'source': 'custom'},
-  {'item_name': 'Paneer', 'category': 'dairy', 'location': 'freezer', 'shelf_days': 60, 'source': 'custom'},
-  {'item_name': 'Butter', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 30, 'source': 'usda'},
-  {'item_name': 'Cheese', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Ghee', 'category': 'dairy', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Cream', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 7, 'source': 'usda'},
-  {'item_name': 'Buttermilk', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 3, 'source': 'custom'},
+export 'items_vegetables.dart';
+export 'items_fruits.dart';
+export 'items_dairy.dart';
+export 'items_grains.dart';
+export 'items_spices.dart';
+export 'items_oils_condiments.dart';
+export 'items_packaged.dart';
+export 'items_beverages.dart';
+export 'items_snacks_bakery.dart';
+export 'items_dryfruits.dart';
+export 'items_frozen_homemade.dart';
+export 'items_extras.dart';
 
-  // === GRAINS & PULSES ===
-  {'item_name': 'Rice', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'usda'},
-  {'item_name': 'Wheat Flour', 'category': 'grain', 'location': 'pantry', 'shelf_days': 90, 'source': 'custom'},
-  {'item_name': 'Rava', 'category': 'grain', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Poha', 'category': 'grain', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Toor Dal', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Moong Dal', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Chana Dal', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Urad Dal', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Masoor Dal', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Rajma', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Chana', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Besan', 'category': 'grain', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Ragi Flour', 'category': 'grain', 'location': 'pantry', 'shelf_days': 90, 'source': 'custom'},
-  {'item_name': 'Idli Rava', 'category': 'grain', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Vermicelli', 'category': 'grain', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
+class ShelfLifeItem {
+  final String name;
+  final List<String> aliases;
+  final String category;
+  final String subcategory;
+  final Map<String, int> shelfDaysByLocation; // e.g. {'fridge': 7, 'pantry': 3}
+  final String defaultLocation;
+  final String defaultUnit;
+  final bool isPerishable;
+  final double typicalQuantity;
+  final int? openedShelfDays; // shelf life after opening (for packaged goods)
+  final String? brand; // null for generic items
+  final String source;
 
-  // === SPICES (long shelf life) ===
-  {'item_name': 'Turmeric Powder', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'usda'},
-  {'item_name': 'Red Chilli Powder', 'category': 'spice', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Coriander Powder', 'category': 'spice', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Cumin Seeds', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'usda'},
-  {'item_name': 'Mustard Seeds', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
-  {'item_name': 'Garam Masala', 'category': 'spice', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Sambar Powder', 'category': 'spice', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Rasam Powder', 'category': 'spice', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
-  {'item_name': 'Asafoetida', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
-  {'item_name': 'Black Pepper', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'usda'},
-  {'item_name': 'Cardamom', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
-  {'item_name': 'Cloves', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
-  {'item_name': 'Cinnamon', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'usda'},
-  {'item_name': 'Bay Leaf', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
-  {'item_name': 'Fenugreek Seeds', 'category': 'spice', 'location': 'pantry', 'shelf_days': 730, 'source': 'custom'},
+  const ShelfLifeItem({
+    required this.name,
+    required this.aliases,
+    required this.category,
+    this.subcategory = '',
+    required this.shelfDaysByLocation,
+    required this.defaultLocation,
+    this.defaultUnit = 'pieces',
+    this.isPerishable = true,
+    this.typicalQuantity = 1,
+    this.openedShelfDays,
+    this.brand,
+    this.source = 'custom',
+  });
 
-  // === OILS & CONDIMENTS ===
-  {'item_name': 'Cooking Oil', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'usda'},
-  {'item_name': 'Coconut Oil', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Sesame Oil', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Salt', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 1825, 'source': 'usda'},
-  {'item_name': 'Sugar', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 730, 'source': 'usda'},
-  {'item_name': 'Jaggery', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Tamarind', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Pickle', 'category': 'packaged', 'location': 'fridge', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Papad', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 180, 'source': 'custom'},
+  int? getShelfDays(String location) => shelfDaysByLocation[location];
+  int get defaultShelfDays => shelfDaysByLocation[defaultLocation] ?? 7;
 
-  // === PACKAGED FOOD ===
-  {'item_name': 'Bread', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 5, 'source': 'usda'},
-  {'item_name': 'Bread', 'category': 'packaged', 'location': 'fridge', 'shelf_days': 10, 'source': 'usda'},
-  {'item_name': 'Eggs', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 21, 'source': 'usda'},
-  {'item_name': 'Tea Powder', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Coffee Powder', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 365, 'source': 'custom'},
-  {'item_name': 'Biscuits', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 90, 'source': 'custom'},
+  /// Returns all searchable terms (name + all aliases, lowercased)
+  List<String> get searchTerms => [name.toLowerCase(), ...aliases.map((a) => a.toLowerCase())];
+}
 
-  // === BEVERAGES ===
-  {'item_name': 'Juice', 'category': 'beverage', 'location': 'fridge', 'shelf_days': 7, 'source': 'usda'},
+// ============================================================================
+// CATEGORIES & DISPLAY CONSTANTS
+// ============================================================================
 
-  // === Category-level defaults (fallback) ===
-  {'item_name': 'vegetable', 'category': 'vegetable', 'location': 'fridge', 'shelf_days': 5, 'source': 'default'},
-  {'item_name': 'vegetable', 'category': 'vegetable', 'location': 'pantry', 'shelf_days': 3, 'source': 'default'},
-  {'item_name': 'fruit', 'category': 'fruit', 'location': 'fridge', 'shelf_days': 7, 'source': 'default'},
-  {'item_name': 'fruit', 'category': 'fruit', 'location': 'pantry', 'shelf_days': 4, 'source': 'default'},
-  {'item_name': 'dairy', 'category': 'dairy', 'location': 'fridge', 'shelf_days': 5, 'source': 'default'},
-  {'item_name': 'grain', 'category': 'grain', 'location': 'pantry', 'shelf_days': 180, 'source': 'default'},
-  {'item_name': 'spice', 'category': 'spice', 'location': 'pantry', 'shelf_days': 365, 'source': 'default'},
-  {'item_name': 'packaged', 'category': 'packaged', 'location': 'pantry', 'shelf_days': 90, 'source': 'default'},
-  {'item_name': 'beverage', 'category': 'beverage', 'location': 'fridge', 'shelf_days': 7, 'source': 'default'},
-  {'item_name': 'other', 'category': 'other', 'location': 'pantry', 'shelf_days': 30, 'source': 'default'},
-];
-
-/// Category display info
 const Map<String, String> categoryIcons = {
   'vegetable': '🥬',
   'fruit': '🍎',
   'dairy': '🥛',
+  'egg': '🥚',
   'grain': '🌾',
   'spice': '🌶️',
+  'oil': '🫒',
+  'condiment': '🫙',
   'packaged': '📦',
   'beverage': '🥤',
+  'snack': '🍪',
+  'frozen': '🧊',
+  'bakery': '🍞',
+  'dryfruits': '🥜',
+  'homemade': '🍲',
   'other': '🏷️',
 };
 
@@ -141,10 +92,18 @@ const Map<String, String> categoryNames = {
   'vegetable': 'Vegetables',
   'fruit': 'Fruits',
   'dairy': 'Dairy',
+  'egg': 'Eggs',
   'grain': 'Grains & Pulses',
-  'spice': 'Spices',
+  'spice': 'Spices & Masalas',
+  'oil': 'Oils & Ghee',
+  'condiment': 'Condiments & Sauces',
   'packaged': 'Packaged Food',
   'beverage': 'Beverages',
+  'snack': 'Snacks & Namkeen',
+  'frozen': 'Frozen Food',
+  'bakery': 'Bakery & Bread',
+  'dryfruits': 'Dry Fruits & Nuts',
+  'homemade': 'Homemade/Fresh',
   'other': 'Other',
 };
 
@@ -153,6 +112,7 @@ const Map<String, String> locationIcons = {
   'freezer': '🧊',
   'pantry': '🏠',
   'shelf': '📚',
+  'countertop': '🍽️',
   'other': '📍',
 };
 
@@ -161,6 +121,7 @@ const List<String> storageLocations = [
   'freezer',
   'pantry',
   'shelf',
+  'countertop',
   'other',
 ];
 
@@ -173,4 +134,111 @@ const List<String> unitOptions = [
   'ml',
   'dozen',
   'bunch',
+  'bottles',
+  'boxes',
+  'cans',
+  'bags',
+  'sachets',
+];
+
+// ============================================================================
+// MASTER DATABASE — ~500 items
+// ============================================================================
+
+final List<ShelfLifeItem> shelfLifeDatabase = [
+  // -------------------------------------------------------
+  // VEGETABLES (~55 items)
+  // -------------------------------------------------------
+  ...vegetableItems,
+  // -------------------------------------------------------
+  // FRUITS (~35 items)
+  // -------------------------------------------------------
+  ...fruitItems,
+  // -------------------------------------------------------
+  // DAIRY (~30 items)
+  // -------------------------------------------------------
+  ...dairyItems,
+  // -------------------------------------------------------
+  // EGGS (~5 items)
+  // -------------------------------------------------------
+  ...eggItems,
+  // -------------------------------------------------------
+  // GRAINS, FLOUR & PULSES (~50 items)
+  // -------------------------------------------------------
+  ...grainItems,
+  // -------------------------------------------------------
+  // SPICES & MASALAS (~55 items)
+  // -------------------------------------------------------
+  ...spiceItems,
+  // -------------------------------------------------------
+  // OILS & GHEE (~20 items)
+  // -------------------------------------------------------
+  ...oilItems,
+  // -------------------------------------------------------
+  // CONDIMENTS & SAUCES (~35 items)
+  // -------------------------------------------------------
+  ...condimentItems,
+  // -------------------------------------------------------
+  // PACKAGED FOOD (~50 items)
+  // -------------------------------------------------------
+  ...packagedItems,
+  // -------------------------------------------------------
+  // BEVERAGES (~25 items)
+  // -------------------------------------------------------
+  ...beverageItems,
+  // -------------------------------------------------------
+  // SNACKS & NAMKEEN (~20 items)
+  // -------------------------------------------------------
+  ...snackItems,
+  // -------------------------------------------------------
+  // BAKERY & BREAD (~10 items)
+  // -------------------------------------------------------
+  ...bakeryItems,
+  // -------------------------------------------------------
+  // DRY FRUITS & NUTS (~25 items)
+  // -------------------------------------------------------
+  ...dryfruitItems,
+  // -------------------------------------------------------
+  // FROZEN FOOD (~15 items)
+  // -------------------------------------------------------
+  ...frozenItems,
+  // -------------------------------------------------------
+  // HOMEMADE / FRESH (~15 items)
+  // -------------------------------------------------------
+  ...homemadeItems,
+  // -------------------------------------------------------
+  // EXTRAS — more brands, regional, organic (~100 items)
+  // -------------------------------------------------------
+  ...extraDairyItems,
+  ...extraPackagedItems,
+  ...extraSnackItems,
+  ...extraBeverageItems,
+  ...extraVegetableItems,
+  ...extraOilItems,
+  ...organicItems,
+  ...extraFruitItems,
+  ...miscItems,
+];
+
+// ============================================================================
+// CATEGORY DEFAULTS (fallback when no specific item matches)
+// ============================================================================
+
+final List<ShelfLifeItem> categoryDefaults = [
+  ShelfLifeItem(name: 'vegetable', aliases: [], category: 'vegetable', shelfDaysByLocation: {'fridge': 5, 'pantry': 3, 'freezer': 30}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'fruit', aliases: [], category: 'fruit', shelfDaysByLocation: {'fridge': 7, 'pantry': 4, 'freezer': 30}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'dairy', aliases: [], category: 'dairy', shelfDaysByLocation: {'fridge': 5, 'freezer': 30}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'egg', aliases: [], category: 'egg', shelfDaysByLocation: {'fridge': 21, 'pantry': 7}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'grain', aliases: [], category: 'grain', shelfDaysByLocation: {'pantry': 180}, defaultLocation: 'pantry', isPerishable: false, source: 'default'),
+  ShelfLifeItem(name: 'spice', aliases: [], category: 'spice', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', isPerishable: false, source: 'default'),
+  ShelfLifeItem(name: 'oil', aliases: [], category: 'oil', shelfDaysByLocation: {'pantry': 365}, defaultLocation: 'pantry', isPerishable: false, source: 'default'),
+  ShelfLifeItem(name: 'condiment', aliases: [], category: 'condiment', shelfDaysByLocation: {'fridge': 90, 'pantry': 60}, defaultLocation: 'pantry', source: 'default'),
+  ShelfLifeItem(name: 'packaged', aliases: [], category: 'packaged', shelfDaysByLocation: {'pantry': 90}, defaultLocation: 'pantry', source: 'default'),
+  ShelfLifeItem(name: 'beverage', aliases: [], category: 'beverage', shelfDaysByLocation: {'fridge': 7, 'pantry': 180}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'snack', aliases: [], category: 'snack', shelfDaysByLocation: {'pantry': 60}, defaultLocation: 'pantry', source: 'default'),
+  ShelfLifeItem(name: 'frozen', aliases: [], category: 'frozen', shelfDaysByLocation: {'freezer': 90}, defaultLocation: 'freezer', source: 'default'),
+  ShelfLifeItem(name: 'bakery', aliases: [], category: 'bakery', shelfDaysByLocation: {'pantry': 3, 'fridge': 7}, defaultLocation: 'pantry', source: 'default'),
+  ShelfLifeItem(name: 'dryfruits', aliases: [], category: 'dryfruits', shelfDaysByLocation: {'pantry': 180}, defaultLocation: 'pantry', isPerishable: false, source: 'default'),
+  ShelfLifeItem(name: 'homemade', aliases: [], category: 'homemade', shelfDaysByLocation: {'fridge': 3, 'freezer': 14}, defaultLocation: 'fridge', source: 'default'),
+  ShelfLifeItem(name: 'other', aliases: [], category: 'other', shelfDaysByLocation: {'pantry': 30}, defaultLocation: 'pantry', source: 'default'),
 ];
