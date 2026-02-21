@@ -882,9 +882,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
       unit: _unit,
       storageLocation: _storageLocation,
       photoPath: _photoPaths.isNotEmpty ? _photoPaths.first : null,
+      photoPaths: _photoPaths.length > 1 ? _photoPaths.join(',') : null,
       expiryDate: _expiryDate,
       mfgDate: _mfgDate,
       isPerishable: !['spice', 'dryfruits', 'oil'].contains(_category),
+      brand: _detectedBrand,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),

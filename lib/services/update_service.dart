@@ -36,18 +36,38 @@ class UpdateService {
   static final UpdateService instance = UpdateService._init();
   UpdateService._init();
 
+  /// Guard: true once we've already checked (or shown dialog) this session.
+  bool _hasCheckedThisSession = false;
+
   /// Check if a newer version is available.
   /// Returns [UpdateInfo] if an update is available, null otherwise.
+  /// Only checks once per app session to avoid nagging.
   Future<UpdateInfo?> checkForUpdate() async {
+    // Only check once per app lifecycle
+    if (_hasCheckedThisSession) return null;
+    _hasCheckedThisSession = true;
+
     try {
-      final response = await http
-          .get(Uri.parse(AppConfig.updateCheckUrl))
-          .timeout(const Duration(seconds: 10));
+      // Add cache-busting query param + no-cache headers to defeat
+      // GitHub CDN / Android HTTP cache serving stale Gist responses.
+      final uri = Uri.parse(AppConfig.updateCheckUrl).replace(
+        queryParameters: {'_t': DateTime.now().millisecondsSinceEpoch.toString()},
+      );
+
+      final response = await http.get(uri, headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      }).timeout(const Duration(seconds: 10));
 
       if (response.statusCode != 200) return null;
 
       final json = jsonDecode(response.body) as Map<String, dynamic>;
       final updateInfo = UpdateInfo.fromJson(json);
+
+      debugPrint(
+        'Update check: remote=${updateInfo.latestVersionCode}, '
+        'local=${AppConfig.currentVersionCode}',
+      );
 
       if (updateInfo.latestVersionCode > AppConfig.currentVersionCode) {
         return updateInfo;
@@ -68,8 +88,10 @@ class UpdateService {
     String downloadUrl, {
     void Function(double progress)? onProgress,
   }) async {
+    http.Client? client;
+    IOSink? sink;
     try {
-      final client = http.Client();
+      client = http.Client();
       final request = http.Request('GET', Uri.parse(downloadUrl));
       request.followRedirects = true;
       request.maxRedirects = 5;
@@ -77,7 +99,6 @@ class UpdateService {
           .timeout(const Duration(minutes: 5));
 
       if (response.statusCode != 200) {
-        client.close();
         debugPrint('Download failed: HTTP ${response.statusCode} for $downloadUrl');
         return null;
       }
@@ -86,7 +107,7 @@ class UpdateService {
       final dir = await getTemporaryDirectory();
       final filePath = '${dir.path}/ammas_kitchen_update.apk';
       final file = File(filePath);
-      final sink = file.openWrite();
+      sink = file.openWrite();
 
       int received = 0;
       await for (final chunk in response.stream) {
@@ -98,11 +119,15 @@ class UpdateService {
       }
 
       await sink.close();
-      client.close();
+      sink = null; // mark closed so finally doesn't double-close
       return filePath;
     } catch (e) {
       debugPrint('Download failed: $e');
       return null;
+    } finally {
+      // Always clean up resources
+      try { await sink?.close(); } catch (_) {}
+      client?.close();
     }
   }
 
@@ -111,7 +136,7 @@ class UpdateService {
     BuildContext context,
     UpdateInfo updateInfo,
   ) async {
-    showDialog(
+    await showDialog(
       context: context,
       barrierDismissible: !updateInfo.forceUpdate,
       builder: (ctx) => _UpdateDialog(updateInfo: updateInfo),
@@ -227,27 +252,17 @@ class _UpdateDialogState extends State<_UpdateDialog> {
   }
 
   Future<void> _installApk(String filePath) async {
-    // We'll use a platform channel to trigger the Android install intent
-    // For now, show a message directing to the file
     if (mounted) {
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Update downloaded! Opening installer...',
-          ),
+          content: Text('Update downloaded! Opening installer...'),
           duration: Duration(seconds: 3),
         ),
       );
     }
 
     // Trigger install via platform channel
-    await _triggerInstall(filePath);
-  }
-
-  Future<void> _triggerInstall(String filePath) async {
-    // This will be handled by the native Android side
-    // Using the install_plugin or manual platform channel
     try {
       await InstallHelper.installApk(filePath);
     } catch (e) {
