@@ -26,5 +26,5 @@ class AppConfig {
   /// }
   /// ```
   static const String updateCheckUrl =
-      'https://gist.githubusercontent.com/YOUR_GITHUB_USERNAME/YOUR_GIST_ID/raw/update.json';
+      'https://gist.githubusercontent.com/vignesh-sabhahit/2b8b64ce77833afc0cd3a6c91f581fb1/raw/update.json';
 }
