@@ -1,0 +1,351 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <!-- Warm gradient for background -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFB347"/>
+      <stop offset="100%" stop-color="#E8862A"/>
+    </linearGradient>
+    <!-- Subtle inner glow -->
+    <radialGradient id="innerGlow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0%" stop-color="#FFECD2" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#FFECD2" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Skin tone gradient -->
+    <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#F5D0A9"/>
+      <stop offset="100%" stop-color="#E8B88A"/>
+    </linearGradient>
+    <!-- Cupboard wood gradient -->
+    <linearGradient id="woodGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#A0724A"/>
+      <stop offset="100%" stop-color="#7D5A3C"/>
+    </linearGradient>
+    <!-- Shelf wood -->
+    <linearGradient id="shelfGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#C4956A"/>
+      <stop offset="50%" stop-color="#D4A574"/>
+      <stop offset="100%" stop-color="#B8885E"/>
+    </linearGradient>
+    <!-- Jar gradients -->
+    <linearGradient id="jarRed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#E85D4A"/>
+      <stop offset="100%" stop-color="#C94432"/>
+    </linearGradient>
+    <linearGradient id="jarYellow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFD966"/>
+      <stop offset="100%" stop-color="#F0C040"/>
+    </linearGradient>
+    <linearGradient id="jarGreen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7BC67E"/>
+      <stop offset="100%" stop-color="#5BA85E"/>
+    </linearGradient>
+    <linearGradient id="jarBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6CB4D9"/>
+      <stop offset="100%" stop-color="#4A96BB"/>
+    </linearGradient>
+    <!-- Saree/dupatta gradient -->
+    <linearGradient id="sareeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E8443A"/>
+      <stop offset="100%" stop-color="#C62828"/>
+    </linearGradient>
+    <!-- Blouse gradient -->
+    <linearGradient id="blouseGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2E7D32"/>
+      <stop offset="100%" stop-color="#1B5E20"/>
+    </linearGradient>
+    <!-- Hair gradient -->
+    <linearGradient id="hairGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2C2C2C"/>
+      <stop offset="100%" stop-color="#1A1A1A"/>
+    </linearGradient>
+    <!-- Shadow filter -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#00000033"/>
+    </filter>
+    <filter id="softShadow" x="-10%" y="-10%" width="125%" height="125%">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <!-- === BACKGROUND === -->
+  <rect x="20" y="20" width="984" height="984" rx="180" ry="180" fill="url(#bgGrad)"/>
+  <rect x="20" y="20" width="984" height="984" rx="180" ry="180" fill="url(#innerGlow)"/>
+  <!-- Subtle border -->
+  <rect x="20" y="20" width="984" height="984" rx="180" ry="180" fill="none" stroke="#D4782A" stroke-width="3"/>
+
+  <!-- === CUPBOARD / SHELF UNIT === -->
+  <!-- Cupboard back panel -->
+  <rect x="440" y="130" width="470" height="580" rx="18" ry="18" fill="#8B6B4A" opacity="0.95"/>
+  <rect x="450" y="140" width="450" height="560" rx="12" ry="12" fill="#F5E6D0"/>
+
+  <!-- Cupboard interior warm color -->
+  <rect x="455" y="145" width="440" height="550" rx="10" ry="10" fill="#FFF8F0"/>
+
+  <!-- Top shelf -->
+  <rect x="440" y="310" width="470" height="16" rx="3" ry="3" fill="url(#shelfGrad)" filter="url(#softShadow)"/>
+  <!-- Middle shelf -->
+  <rect x="440" y="480" width="470" height="16" rx="3" ry="3" fill="url(#shelfGrad)" filter="url(#softShadow)"/>
+  <!-- Bottom shelf -->
+  <rect x="440" y="640" width="470" height="16" rx="3" ry="3" fill="url(#shelfGrad)" filter="url(#softShadow)"/>
+
+  <!-- Cupboard side frame left -->
+  <rect x="435" y="125" width="18" height="590" rx="4" ry="4" fill="url(#woodGrad)"/>
+  <!-- Cupboard side frame right -->
+  <rect x="900" y="125" width="18" height="590" rx="4" ry="4" fill="url(#woodGrad)"/>
+  <!-- Cupboard top frame -->
+  <rect x="435" y="122" width="485" height="18" rx="4" ry="4" fill="#B8885E"/>
+  <!-- Cupboard bottom frame -->
+  <rect x="435" y="700" width="485" height="18" rx="4" ry="4" fill="url(#woodGrad)"/>
+
+  <!-- === JARS ON TOP SHELF (y: 145..310) === -->
+  <!-- Big round red spice jar -->
+  <g transform="translate(490, 200)">
+    <rect x="-28" y="-75" width="56" height="85" rx="14" fill="url(#jarRed)" opacity="0.9"/>
+    <rect x="-22" y="-80" width="44" height="12" rx="6" fill="#C94432"/>
+    <!-- Cute label -->
+    <rect x="-18" y="-50" width="36" height="22" rx="4" fill="#FFF8F0" opacity="0.8"/>
+    <text x="0" y="-35" text-anchor="middle" font-size="14" font-family="Arial" fill="#C94432" font-weight="bold">
+    </text>
+    <!-- Shine -->
+    <ellipse cx="-12" cy="-55" rx="5" ry="12" fill="white" opacity="0.3"/>
+  </g>
+
+  <!-- Yellow turmeric jar -->
+  <g transform="translate(580, 210)">
+    <rect x="-24" y="-70" width="48" height="78" rx="12" fill="url(#jarYellow)" opacity="0.9"/>
+    <rect x="-18" y="-75" width="36" height="10" rx="5" fill="#D4A030"/>
+    <rect x="-15" y="-48" width="30" height="18" rx="3" fill="#FFF8F0" opacity="0.8"/>
+    <ellipse cx="-10" cy="-50" rx="4" ry="10" fill="white" opacity="0.3"/>
+  </g>
+
+  <!-- Small green jar -->
+  <g transform="translate(660, 225)">
+    <rect x="-20" y="-58" width="40" height="65" rx="10" fill="url(#jarGreen)" opacity="0.9"/>
+    <rect x="-15" y="-62" width="30" height="9" rx="4" fill="#4A8A4D"/>
+    <ellipse cx="-8" cy="-42" rx="4" ry="9" fill="white" opacity="0.3"/>
+  </g>
+
+  <!-- Tall blue jar -->
+  <g transform="translate(745, 195)">
+    <rect x="-22" y="-78" width="44" height="90" rx="10" fill="url(#jarBlue)" opacity="0.9"/>
+    <rect x="-16" y="-83" width="32" height="10" rx="5" fill="#3D7FA0"/>
+    <rect x="-14" y="-55" width="28" height="18" rx="3" fill="#FFF8F0" opacity="0.8"/>
+    <ellipse cx="-9" cy="-58" rx="4" ry="12" fill="white" opacity="0.3"/>
+  </g>
+
+  <!-- Small red jar right -->
+  <g transform="translate(835, 228)">
+    <rect x="-18" y="-52" width="36" height="58" rx="9" fill="#E07050" opacity="0.9"/>
+    <rect x="-13" y="-56" width="26" height="8" rx="4" fill="#B85A40"/>
+    <ellipse cx="-7" cy="-38" rx="3" ry="8" fill="white" opacity="0.3"/>
+  </g>
+
+  <!-- === JARS ON MIDDLE SHELF (y: 326..480) === -->
+  <!-- Wide yellow container -->
+  <g transform="translate(500, 395)">
+    <rect x="-32" y="-60" width="64" height="68" rx="14" fill="#F0C040" opacity="0.9"/>
+    <rect x="-26" y="-65" width="52" height="10" rx="5" fill="#D4A030"/>
+    <rect x="-20" y="-42" width="40" height="20" rx="4" fill="#FFF8F0" opacity="0.7"/>
+    <ellipse cx="-14" cy="-44" rx="5" ry="11" fill="white" opacity="0.25"/>
+  </g>
+
+  <!-- Glass jar with dots (spices visible) -->
+  <g transform="translate(600, 400)">
+    <rect x="-22" y="-58" width="44" height="65" rx="10" fill="#E8D8C8" opacity="0.7" stroke="#C8B8A0" stroke-width="2"/>
+    <rect x="-16" y="-62" width="32" height="9" rx="4" fill="#A08060"/>
+    <!-- Spice dots inside -->
+    <circle cx="-6" cy="-30" r="3" fill="#C94432" opacity="0.6"/>
+    <circle cx="4" cy="-25" r="3" fill="#C94432" opacity="0.5"/>
+    <circle cx="-2" cy="-18" r="3" fill="#C94432" opacity="0.6"/>
+    <circle cx="8" cy="-35" r="2.5" fill="#C94432" opacity="0.5"/>
+    <circle cx="-8" cy="-20" r="2.5" fill="#C94432" opacity="0.4"/>
+  </g>
+
+  <!-- Round green pot -->
+  <g transform="translate(700, 405)">
+    <ellipse cx="0" cy="-30" rx="30" ry="35" fill="url(#jarGreen)" opacity="0.85"/>
+    <ellipse cx="0" cy="-58" rx="20" ry="8" fill="#4A8A4D"/>
+    <ellipse cx="-12" cy="-40" rx="5" ry="10" fill="white" opacity="0.2"/>
+  </g>
+
+  <!-- Small orange jar -->
+  <g transform="translate(790, 415)">
+    <rect x="-18" y="-48" width="36" height="52" rx="8" fill="#E8862A" opacity="0.9"/>
+    <rect x="-13" y="-52" width="26" height="8" rx="4" fill="#C4700A"/>
+    <ellipse cx="-7" cy="-34" rx="3" ry="8" fill="white" opacity="0.25"/>
+  </g>
+
+  <!-- Tiny purple jar -->
+  <g transform="translate(860, 420)">
+    <rect x="-15" y="-42" width="30" height="46" rx="8" fill="#9C6DBE" opacity="0.85"/>
+    <rect x="-10" y="-46" width="20" height="7" rx="3.5" fill="#7A4E9C"/>
+    <ellipse cx="-5" cy="-30" rx="3" ry="7" fill="white" opacity="0.25"/>
+  </g>
+
+  <!-- === ITEMS ON BOTTOM SHELF (y: 496..640) === -->
+  <!-- Steel dabba / container -->
+  <g transform="translate(520, 575)">
+    <ellipse cx="0" cy="-25" rx="40" ry="38" fill="#D0D0D0" opacity="0.8"/>
+    <ellipse cx="0" cy="-55" rx="30" ry="10" fill="#B8B8B8"/>
+    <ellipse cx="-15" cy="-35" rx="6" ry="14" fill="white" opacity="0.25"/>
+  </g>
+
+  <!-- Rice bag -->
+  <g transform="translate(640, 585)">
+    <path d="M-30,-50 Q-32,-55 -28,-58 L28,-58 Q32,-55 30,-50 L26,0 Q24,5 -24,5 L-26,0 Z" fill="#F5E6D0" stroke="#C8B090" stroke-width="2"/>
+    <text x="0" y="-22" text-anchor="middle" font-size="16" font-family="Arial" fill="#8B6B4A" font-weight="bold">RICE</text>
+  </g>
+
+  <!-- Small blue container -->
+  <g transform="translate(770, 590)">
+    <rect x="-22" y="-42" width="44" height="48" rx="10" fill="url(#jarBlue)" opacity="0.85"/>
+    <rect x="-16" y="-46" width="32" height="8" rx="4" fill="#3D7FA0"/>
+  </g>
+
+  <!-- Tiny yellow pot -->
+  <g transform="translate(860, 595)">
+    <rect x="-16" y="-36" width="32" height="40" rx="8" fill="#F0C040" opacity="0.85"/>
+    <rect x="-12" y="-40" width="24" height="7" rx="3.5" fill="#D4A030"/>
+  </g>
+
+  <!-- === AMMA CHARACTER === -->
+  <g filter="url(#shadow)">
+    <!-- Body / Saree -->
+    <path d="M180,920 Q170,780 200,700 Q230,650 300,620 Q350,605 390,610 Q430,620 460,660 Q490,720 500,780 Q510,850 510,920 Z" fill="url(#sareeGrad)"/>
+    <!-- Saree gold border at bottom -->
+    <path d="M180,920 Q180,900 185,880 L505,880 Q510,900 510,920 Z" fill="#FFD700" opacity="0.5"/>
+    <line x1="180" y1="895" x2="510" y2="895" stroke="#FFD700" stroke-width="3" opacity="0.6"/>
+    <line x1="180" y1="905" x2="510" y2="905" stroke="#FFD700" stroke-width="2" opacity="0.4"/>
+
+    <!-- Blouse -->
+    <path d="M260,620 Q290,590 345,580 Q400,590 430,620 Q435,640 430,660 Q400,680 345,685 Q290,680 260,660 Z" fill="url(#blouseGrad)"/>
+
+    <!-- Neck -->
+    <rect x="315" y="530" width="60" height="55" rx="20" fill="url(#skinGrad)"/>
+
+    <!-- Left arm reaching into cupboard -->
+    <path d="M430,640 Q470,610 510,580 Q540,560 570,550 Q590,545 600,555 Q605,565 595,575 Q570,590 540,600 Q510,615 480,640 Z" fill="url(#skinGrad)"/>
+    <!-- Sleeve on left arm -->
+    <path d="M425,635 Q440,620 460,610 Q470,615 460,630 Q445,645 430,650 Z" fill="url(#blouseGrad)"/>
+
+    <!-- Right arm at side -->
+    <path d="M260,640 Q230,670 210,720 Q200,750 205,760 Q215,765 225,750 Q240,720 255,690 Q265,665 268,650 Z" fill="url(#skinGrad)"/>
+    <!-- Sleeve on right arm -->
+    <path d="M265,635 Q250,650 240,665 Q235,660 245,645 Q255,630 268,625 Z" fill="url(#blouseGrad)"/>
+
+    <!-- Head - round cute face -->
+    <circle cx="345" cy="470" r="95" fill="url(#skinGrad)"/>
+
+    <!-- Hair - full black hair with center parting -->
+    <path d="M250,455 Q250,370 300,340 Q345,325 390,340 Q440,370 440,455 Q438,430 420,415 Q400,400 345,395 Q290,400 270,415 Q252,430 250,455 Z" fill="url(#hairGrad)"/>
+    <!-- Hair sides -->
+    <path d="M250,455 Q248,470 252,490 Q255,475 258,460 Q255,455 250,455 Z" fill="url(#hairGrad)"/>
+    <path d="M440,455 Q442,470 438,490 Q435,475 432,460 Q435,455 440,455 Z" fill="url(#hairGrad)"/>
+
+    <!-- Center hair parting line -->
+    <line x1="345" y1="330" x2="345" y2="400" stroke="#3D3D3D" stroke-width="1.5" opacity="0.5"/>
+
+    <!-- Bindi -->
+    <circle cx="345" cy="430" r="8" fill="#E8443A"/>
+    <circle cx="345" cy="430" r="5" fill="#FF5252"/>
+    <circle cx="343" cy="428" r="2" fill="#FF8A80" opacity="0.6"/>
+
+    <!-- Eyes - big cute kawaii eyes, looking right toward cupboard -->
+    <!-- Left eye -->
+    <ellipse cx="310" cy="465" rx="22" ry="24" fill="white"/>
+    <ellipse cx="316" cy="467" rx="14" ry="15" fill="#3E2723"/>
+    <circle cx="320" cy="462" r="6" fill="white"/>
+    <circle cx="312" cy="472" r="3" fill="white" opacity="0.5"/>
+    <!-- Eyelashes -->
+    <path d="M290,450 Q295,445 300,448" stroke="#2C2C2C" stroke-width="2.5" fill="none"/>
+    <path d="M286,458 Q290,452 296,454" stroke="#2C2C2C" stroke-width="2" fill="none"/>
+
+    <!-- Right eye -->
+    <ellipse cx="380" cy="465" rx="22" ry="24" fill="white"/>
+    <ellipse cx="386" cy="467" rx="14" ry="15" fill="#3E2723"/>
+    <circle cx="390" cy="462" r="6" fill="white"/>
+    <circle cx="382" cy="472" r="3" fill="white" opacity="0.5"/>
+    <!-- Eyelashes -->
+    <path d="M404,448 Q408,444 412,450" stroke="#2C2C2C" stroke-width="2.5" fill="none"/>
+    <path d="M408,454 Q412,450 416,456" stroke="#2C2C2C" stroke-width="2" fill="none"/>
+
+    <!-- Eyebrows - slightly raised, curious look -->
+    <path d="M290,438 Q310,426 335,432" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M355,432 Q380,426 405,438" stroke="#3E2723" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+    <!-- Cute small nose -->
+    <path d="M340,482 Q345,490 350,482" stroke="#C8987A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- Mouth - cute surprised/searching 'o' shape -->
+    <ellipse cx="345" cy="505" rx="12" ry="10" fill="#D4736A"/>
+    <ellipse cx="345" cy="503" rx="9" ry="7" fill="#E88880" opacity="0.5"/>
+
+    <!-- Cheek blush -->
+    <ellipse cx="290" cy="490" rx="18" ry="12" fill="#FFB4A0" opacity="0.45"/>
+    <ellipse cx="400" cy="490" rx="18" ry="12" fill="#FFB4A0" opacity="0.45"/>
+
+    <!-- Dupatta/Pallu draped over left shoulder going toward cupboard -->
+    <path d="M380,580 Q420,560 450,550 Q480,540 510,545 Q530,550 520,570 Q500,580 480,590 Q460,600 440,620 Q420,635 410,650 Q400,640 390,620 Z" fill="url(#sareeGrad)" opacity="0.85"/>
+    <!-- Dupatta gold border -->
+    <path d="M380,580 Q420,560 450,550 Q480,540 510,545 Q530,550 520,570" stroke="#FFD700" stroke-width="3" fill="none" opacity="0.7"/>
+    <!-- Dupatta pattern dots -->
+    <circle cx="440" cy="570" r="4" fill="#FFD700" opacity="0.5"/>
+    <circle cx="470" cy="560" r="4" fill="#FFD700" opacity="0.5"/>
+    <circle cx="460" cy="585" r="3.5" fill="#FFD700" opacity="0.4"/>
+    <circle cx="490" cy="570" r="3" fill="#FFD700" opacity="0.4"/>
+    <circle cx="425" cy="595" r="3.5" fill="#FFD700" opacity="0.4"/>
+
+    <!-- Dupatta piece hanging over right side -->
+    <path d="M260,640 Q240,660 230,700 Q225,720 230,730 Q240,735 250,720 Q260,700 270,680 Q275,665 270,650 Z" fill="url(#sareeGrad)" opacity="0.7"/>
+    <path d="M260,640 Q240,660 230,700" stroke="#FFD700" stroke-width="2.5" fill="none" opacity="0.6"/>
+
+    <!-- Earring left -->
+    <circle cx="262" cy="480" r="6" fill="#FFD700"/>
+    <circle cx="262" cy="490" r="4" fill="#FFD700"/>
+    <circle cx="262" cy="480" r="2.5" fill="#FFEB3B" opacity="0.6"/>
+
+    <!-- Earring right -->
+    <circle cx="428" cy="480" r="6" fill="#FFD700"/>
+    <circle cx="428" cy="490" r="4" fill="#FFD700"/>
+    <circle cx="428" cy="480" r="2.5" fill="#FFEB3B" opacity="0.6"/>
+
+    <!-- Necklace hint -->
+    <path d="M300,575 Q320,590 345,595 Q370,590 390,575" stroke="#FFD700" stroke-width="3" fill="none"/>
+    <circle cx="345" cy="596" r="5" fill="#FFD700"/>
+    <circle cx="330" cy="593" r="3" fill="#FFD700"/>
+    <circle cx="360" cy="593" r="3" fill="#FFD700"/>
+
+    <!-- Hand in cupboard - fingers reaching for jar -->
+    <g transform="translate(580, 545)">
+      <ellipse cx="0" cy="0" rx="18" ry="14" fill="url(#skinGrad)"/>
+      <!-- Fingers -->
+      <ellipse cx="14" cy="-8" rx="7" ry="5" fill="url(#skinGrad)" transform="rotate(20, 14, -8)"/>
+      <ellipse cx="18" cy="0" rx="7" ry="4.5" fill="url(#skinGrad)" transform="rotate(5, 18, 0)"/>
+      <ellipse cx="14" cy="8" rx="7" ry="4.5" fill="url(#skinGrad)" transform="rotate(-15, 14, 8)"/>
+      <ellipse cx="8" cy="13" rx="6" ry="4" fill="url(#skinGrad)" transform="rotate(-30, 8, 13)"/>
+    </g>
+  </g>
+
+  <!-- === SPARKLE DECORATIONS === -->
+  <!-- Little sparkles around cupboard -->
+  <g fill="#FFD700" opacity="0.6">
+    <path d="M640,160 l3,-10 l3,10 l10,-3 l-10,3 l3,10 l-3,-10 l-10,3 Z" transform="scale(1.2)"/>
+    <path d="M870,280 l2,-8 l2,8 l8,-2 l-8,2 l2,8 l-2,-8 l-8,2 Z"/>
+    <path d="M470,170 l2,-7 l2,7 l7,-2 l-7,2 l2,7 l-2,-7 l-7,2 Z"/>
+  </g>
+
+  <!-- Tiny hearts (kawaii detail) -->
+  <g fill="#FF8A80" opacity="0.4">
+    <path d="M150,350 c0,-8 12,-8 12,0 c0,8 -6,14 -6,14 c0,0 -6,-6 -6,-14 Z" transform="rotate(-15, 156, 358)"/>
+    <path d="M130,580 c0,-6 9,-6 9,0 c0,6 -4.5,10 -4.5,10 c0,0 -4.5,-4 -4.5,-10 Z" transform="rotate(10, 134, 586)"/>
+  </g>
+
+  <!-- === TEXT "Amma's Kitchen" subtle at bottom === -->
+  <!-- Warm banner at bottom -->
+  <rect x="170" y="910" width="684" height="80" rx="40" ry="40" fill="#7D4A2A" opacity="0.85"/>
+  <rect x="170" y="910" width="684" height="80" rx="40" ry="40" fill="none" stroke="#FFD700" stroke-width="2" opacity="0.5"/>
+
+  <text x="512" y="962" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="52" font-weight="bold" fill="#FFECD2" letter-spacing="2">
+    Amma's Kitchen
+  </text>
+</svg>
