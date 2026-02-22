@@ -21,7 +21,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -46,7 +46,9 @@ class DatabaseService {
         status TEXT DEFAULT 'active',
         notes TEXT,
         brand TEXT,
-        photo_paths TEXT
+        photo_paths TEXT,
+        reminder_days_before INTEGER,
+        best_before_text TEXT
       )
     ''');
   }
@@ -57,6 +59,11 @@ class DatabaseService {
       try { await db.execute('ALTER TABLE items ADD COLUMN brand TEXT'); } catch (_) {}
       try { await db.execute('ALTER TABLE items ADD COLUMN photo_paths TEXT'); } catch (_) {}
       try { await db.execute('DROP TABLE IF EXISTS shelf_life_defaults'); } catch (_) {}
+    }
+    if (oldVersion < 3) {
+      // v2 -> v3: Add reminder and best-before fields
+      try { await db.execute('ALTER TABLE items ADD COLUMN reminder_days_before INTEGER'); } catch (_) {}
+      try { await db.execute('ALTER TABLE items ADD COLUMN best_before_text TEXT'); } catch (_) {}
     }
   }
 

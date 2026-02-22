@@ -11,6 +11,7 @@ import 'package:ammas_kitchen/providers/inventory_provider.dart';
 import 'package:ammas_kitchen/services/database_service.dart';
 import 'package:ammas_kitchen/services/smart_identifier.dart';
 import 'package:ammas_kitchen/data/shelf_life_data.dart';
+import 'package:ammas_kitchen/services/notification_service.dart';
 import 'package:intl/intl.dart';
 
 class AddItemScreen extends StatefulWidget {
@@ -37,6 +38,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   DateTime? _expiryDate;
   DateTime? _mfgDate;
   bool _isProcessing = false;
+  int? _reminderDaysBefore; // null = use global default
 
   // v2 identification results
   List<IdentificationResult> _identificationResults = [];
@@ -128,6 +130,28 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
                   // Expiry date
                   _buildExpirySection(),
+                  const SizedBox(height: 16),
+
+                  // MFG date
+                  _buildMfgDateSection(),
+                  const SizedBox(height: 16),
+
+                  // Best-before info (if detected from OCR)
+                  if (_packagingInfo?.bestBeforeText != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Chip(
+                        avatar: const Icon(Icons.info_outline, size: 16),
+                        label: Text(
+                          'Best before: ${_packagingInfo!.bestBeforeText}',
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                        backgroundColor: Colors.blue[50],
+                      ),
+                    ),
+
+                  // Reminder preference
+                  _buildReminderSection(),
                   const SizedBox(height: 16),
 
                   // Notes
@@ -494,6 +518,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ],
           ),
         ),
+        const SizedBox(width: 16),
         Expanded(
           flex: 2,
           child: Column(
@@ -595,6 +620,91 @@ class _AddItemScreenState extends State<AddItemScreen> {
               label: const Text('Auto-suggest shelf life'),
             ),
           ),
+      ],
+    );
+  }
+
+  Widget _buildMfgDateSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Manufacturing Date',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: _pickMfgDate,
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[400]!),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.factory_outlined, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  _mfgDate != null
+                      ? DateFormat('dd MMM yyyy').format(_mfgDate!)
+                      : 'Tap to set MFG date (optional)',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: _mfgDate != null ? null : Colors.grey[500],
+                  ),
+                ),
+                const Spacer(),
+                if (_mfgDate != null)
+                  IconButton(
+                    icon: const Icon(Icons.clear, size: 20),
+                    onPressed: () => setState(() => _mfgDate = null),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _pickMfgDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _mfgDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 3)),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() => _mfgDate = picked);
+    }
+  }
+
+  Widget _buildReminderSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Expiry Reminder',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+        const SizedBox(height: 8),
+        DropdownButtonFormField<int?>(
+          value: _reminderDaysBefore,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            prefixIcon: Icon(Icons.notifications_outlined),
+          ),
+          items: [
+            const DropdownMenuItem<int?>(
+              value: null,
+              child: Text('Use default'),
+            ),
+            ...reminderOptions.entries.map((e) => DropdownMenuItem<int?>(
+                  value: e.key,
+                  child: Text(e.value),
+                )),
+          ],
+          onChanged: (val) => setState(() => _reminderDaysBefore = val),
+        ),
       ],
     );
   }
@@ -753,7 +863,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
     // 5. Apply packaging info
     _detectedBrand = _packagingInfo?.brand;
 
-    if (_packagingInfo?.expiryDate != null && _expiryDate == null) {
+    // Use computed expiry: explicit expiry > MFG + best-before period
+    if (_expiryDate == null && _packagingInfo?.computedExpiryDate != null) {
+      _expiryDate = _packagingInfo!.computedExpiryDate;
+    } else if (_packagingInfo?.expiryDate != null && _expiryDate == null) {
       _expiryDate = _packagingInfo!.expiryDate;
     }
     if (_packagingInfo?.mfgDate != null) {
@@ -890,15 +1003,59 @@ class _AddItemScreenState extends State<AddItemScreen> {
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
+      reminderDaysBefore: _reminderDaysBefore,
+      bestBeforeText: _packagingInfo?.bestBeforeText,
     );
 
     if (!mounted) return;
     final provider = context.read<InventoryProvider>();
     await provider.addItem(item);
     if (!mounted) return;
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$name added to your kitchen! 🍳')),
+
+    // Quick-add: offer to add another item
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Item saved!'),
+        content: Text('$name added to your kitchen. 🍳'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: const Text('Done'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _resetForm();
+            },
+            child: const Text('Add Another'),
+          ),
+        ],
+      ),
     );
+  }
+
+  void _resetForm() {
+    setState(() {
+      _nameController.clear();
+      _notesController.clear();
+      _photoPaths.clear();
+      _ocrTexts.clear();
+      _category = 'other';
+      _quantity = 1;
+      _unit = 'pieces';
+      _storageLocation = 'fridge';
+      _expiryDate = null;
+      _mfgDate = null;
+      _isProcessing = false;
+      _reminderDaysBefore = null;
+      _identificationResults = [];
+      _packagingInfo = null;
+      _detectedBrand = null;
+      _mlLabels = [];
+    });
   }
 }

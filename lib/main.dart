@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tzlib;
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:ammas_kitchen/providers/inventory_provider.dart';
 import 'package:ammas_kitchen/screens/home_screen.dart';
 import 'package:ammas_kitchen/services/database_service.dart';
@@ -7,6 +10,16 @@ import 'package:ammas_kitchen/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize timezone for scheduled notifications
+  tz.initializeTimeZones();
+  try {
+    final timeZoneName = await FlutterTimezone.getLocalTimezone();
+    tzlib.setLocalLocation(tzlib.getLocation(timeZoneName));
+  } catch (_) {
+    tzlib.setLocalLocation(tzlib.getLocation('Asia/Kolkata'));
+  }
+
   await DatabaseService.instance.database;
   await NotificationService.instance.init();
   runApp(const AmmasKitchenApp());

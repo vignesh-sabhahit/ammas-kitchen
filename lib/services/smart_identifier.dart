@@ -240,6 +240,8 @@ class PackagingInfo {
   final String? batchNumber;
   final String? barcode;
   final String rawText;
+  final String? bestBeforeText; // raw OCR text e.g. "6 months from MFG"
+  final int? bestBeforePeriodDays; // computed period in days
 
   PackagingInfo({
     this.productName,
@@ -253,11 +255,24 @@ class PackagingInfo {
     this.batchNumber,
     this.barcode,
     this.rawText = '',
+    this.bestBeforeText,
+    this.bestBeforePeriodDays,
   });
+
+  /// Compute expiry from available data.
+  /// Priority: explicit expiry > MFG + best-before period
+  DateTime? get computedExpiryDate {
+    if (expiryDate != null) return expiryDate;
+    if (mfgDate != null && bestBeforePeriodDays != null) {
+      return mfgDate!.add(Duration(days: bestBeforePeriodDays!));
+    }
+    return null;
+  }
 
   /// Parse packaging info from raw OCR text
   factory PackagingInfo.fromOCR(String text) {
     final lower = text.toLowerCase();
+    final bbPeriod = _extractBestBeforePeriod(text);
 
     return PackagingInfo(
       expiryDateRaw: _extractExpiryDate(text),
@@ -269,6 +284,8 @@ class PackagingInfo {
       batchNumber: _extractBatchNumber(text),
       brand: _extractBrand(lower),
       rawText: text,
+      bestBeforeText: bbPeriod?.rawText,
+      bestBeforePeriodDays: bbPeriod?.periodDays,
     );
   }
 
@@ -286,6 +303,8 @@ class PackagingInfo {
     String? bestMrp;
     String? bestWeight;
     String? bestBatch;
+    String? bestBBText;
+    int? bestBBDays;
     final allText = StringBuffer();
 
     for (final info in infos) {
@@ -300,6 +319,8 @@ class PackagingInfo {
       bestMrp ??= info.mrp;
       bestWeight ??= info.netWeight;
       bestBatch ??= info.batchNumber;
+      bestBBText ??= info.bestBeforeText;
+      bestBBDays ??= info.bestBeforePeriodDays;
     }
 
     return PackagingInfo(
@@ -313,10 +334,61 @@ class PackagingInfo {
       netWeight: bestWeight,
       batchNumber: bestBatch,
       rawText: allText.toString(),
+      bestBeforeText: bestBBText,
+      bestBeforePeriodDays: bestBBDays,
     );
   }
 
   // --- Pattern extractors ---
+
+  /// Extract "best before X months/days from MFG" style periods from Indian packaging
+  static ({String rawText, int periodDays})? _extractBestBeforePeriod(String text) {
+    final patterns = [
+      // "Best before 6 months from date of packing/manufacturing"
+      // "Best before 18 months from the date of packaging"
+      RegExp(
+        r'(?:best\s*bef(?:ore)?|b\.?b\.?|use\s*(?:with)?in)\s+(\d+)\s*(months?|m|days?|d|years?|yr|yrs|weeks?|wk|wks)\s*(?:from|of|after|fr)?\s*(?:the\s*)?(?:date\s*of\s*)?(?:mfg|manufacturing|packing|packaging|pkg|production|mfd)',
+        caseSensitive: false,
+      ),
+      // "BB 9M from MFG" or "BB: 12M" (abbreviated, common on Indian packaging)
+      RegExp(
+        r'(?:b\.?b\.?|best\s*bef(?:ore)?)\s*[:\s]*(\d+)\s*([mMdDyYwW])\b',
+        caseSensitive: false,
+      ),
+      // "Use within 12 months" (without explicit "from MFG" — still implies from mfg)
+      RegExp(
+        r'use\s*(?:with)?in\s+(\d+)\s*(months?|days?|weeks?|years?)',
+        caseSensitive: false,
+      ),
+      // "Shelf life: 6 months" or "Shelf life 18 months from mfg"
+      RegExp(
+        r'shelf\s*life\s*[:\s]*(\d+)\s*(months?|m|days?|d|years?|yr|weeks?|wk)',
+        caseSensitive: false,
+      ),
+    ];
+
+    for (final pattern in patterns) {
+      final match = pattern.firstMatch(text);
+      if (match != null) {
+        final num = int.tryParse(match.group(1) ?? '');
+        final unitStr = (match.group(2) ?? '').toLowerCase();
+        if (num != null && num > 0) {
+          int days;
+          if (unitStr.startsWith('y')) {
+            days = num * 365;
+          } else if (unitStr.startsWith('m')) {
+            days = num * 30;
+          } else if (unitStr.startsWith('w')) {
+            days = num * 7;
+          } else {
+            days = num; // days
+          }
+          return (rawText: match.group(0)!.trim(), periodDays: days);
+        }
+      }
+    }
+    return null;
+  }
 
   static String? _extractExpiryDate(String text) {
     final patterns = [

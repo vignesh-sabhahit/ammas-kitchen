@@ -1,5 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timezone/timezone.dart' as tz;
 import 'package:ammas_kitchen/models/inventory_item.dart';
+import 'package:ammas_kitchen/services/database_service.dart';
+
+/// Reminder interval options (days before expiry)
+const Map<int, String> reminderOptions = {
+  1: '1 day before',
+  3: '3 days before',
+  7: '1 week before',
+  14: '2 weeks before',
+  30: '1 month before',
+  60: '2 months before',
+};
+
+/// Default reminder interval key in SharedPreferences
+const String _kReminderDefault = 'reminder_default_days';
+
+/// Default value if nothing is set
+const int _kDefaultReminderDays = 7;
 
 class NotificationService {
   static final NotificationService instance = NotificationService._init();
@@ -19,52 +39,90 @@ class NotificationService {
         _notifications.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.requestNotificationsPermission();
+    await androidPlugin?.requestExactAlarmsPermission();
   }
 
+  /// Get the global default reminder days from SharedPreferences
+  Future<int> getGlobalReminderDays() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(_kReminderDefault) ?? _kDefaultReminderDays;
+  }
+
+  /// Set the global default reminder days
+  Future<void> setGlobalReminderDays(int days) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kReminderDefault, days);
+  }
+
+  /// Schedule expiry notifications for an item.
+  /// Uses per-item reminderDaysBefore if set, otherwise global default.
   Future<void> scheduleExpiryNotification(InventoryItem item) async {
     if (item.id == null || item.expiryDate == null) return;
 
-    final now = DateTime.now();
+    // Cancel any existing notifications for this item first
+    await cancelNotification(item.id!);
 
-    // Schedule 3-day warning
-    final threeDayBefore =
-        item.expiryDate!.subtract(const Duration(days: 3));
-    if (threeDayBefore.isAfter(now)) {
-      await _scheduleNotification(
+    final now = DateTime.now();
+    final effectiveDays = item.reminderDaysBefore ?? await getGlobalReminderDays();
+
+    // Schedule reminder notification (X days before expiry)
+    final reminderDate = item.expiryDate!.subtract(Duration(days: effectiveDays));
+    if (reminderDate.isAfter(now)) {
+      final daysText = effectiveDays == 1
+          ? 'tomorrow'
+          : 'in $effectiveDays days';
+      await _scheduleZoned(
         id: item.id! * 10,
-        title: "Amma, use it soon!",
-        body:
-            "${item.name} expires in 3 days. Time to plan a dish with it!",
-        scheduledDate: _atMorning(threeDayBefore),
+        title: 'Amma, use it soon!',
+        body: '${item.name} expires $daysText. Time to plan a dish with it!',
+        scheduledDate: _atMorningTZ(reminderDate),
       );
     }
 
-    // Schedule expiry day notification
+    // Always schedule expiry-day notification
     if (item.expiryDate!.isAfter(now)) {
-      await _scheduleNotification(
+      await _scheduleZoned(
         id: item.id! * 10 + 1,
-        title: "Expires today!",
-        body:
-            "${item.name} expires today. Check if it's still good to use.",
-        scheduledDate: _atMorning(item.expiryDate!),
+        title: 'Expires today!',
+        body: '${item.name} expires today. Check if it\'s still good to use.',
+        scheduledDate: _atMorningTZ(item.expiryDate!),
       );
     }
   }
 
+  /// Cancel all notifications for an item
   Future<void> cancelNotification(int itemId) async {
     await _notifications.cancel(itemId * 10);
     await _notifications.cancel(itemId * 10 + 1);
   }
 
-  DateTime _atMorning(DateTime date) {
-    return DateTime(date.year, date.month, date.day, 8, 0);
+  /// Reschedule ALL active item notifications (call when global default changes)
+  Future<void> rescheduleAllNotifications() async {
+    try {
+      await _notifications.cancelAll();
+      final items = await DatabaseService.instance.getActiveItems();
+      for (final item in items) {
+        if (item.expiryDate != null) {
+          await scheduleExpiryNotification(item);
+        }
+      }
+      debugPrint('Rescheduled notifications for ${items.length} items');
+    } catch (e) {
+      debugPrint('Reschedule all failed: $e');
+    }
   }
 
-  Future<void> _scheduleNotification({
+  /// Convert a DateTime to TZDateTime at 8:00 AM
+  tz.TZDateTime _atMorningTZ(DateTime date) {
+    return tz.TZDateTime(tz.local, date.year, date.month, date.day, 8, 0);
+  }
+
+  /// Schedule a notification using zonedSchedule (survives app kill & reboot)
+  Future<void> _scheduleZoned({
     required int id,
     required String title,
     required String body,
-    required DateTime scheduledDate,
+    required tz.TZDateTime scheduledDate,
   }) async {
     final androidDetails = AndroidNotificationDetails(
       'expiry_channel',
@@ -77,13 +135,23 @@ class NotificationService {
 
     final details = NotificationDetails(android: androidDetails);
 
-    // Use show() for immediate or near-future notifications
-    // For scheduled notifications we check if the date is in the future
-    final now = DateTime.now();
-    if (scheduledDate.isAfter(now)) {
-      final delay = scheduledDate.difference(now);
-      // For simplicity, use a delayed show approach
-      // In production, you'd use zonedSchedule with timezone package
+    try {
+      await _notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: null,
+      );
+    } catch (e) {
+      debugPrint('zonedSchedule failed (id=$id): $e');
+      // Fallback to Future.delayed for devices that don't support exact alarms
+      final delay = scheduledDate.difference(tz.TZDateTime.now(tz.local));
+      if (delay.isNegative) return;
       Future.delayed(delay, () {
         _notifications.show(id, title, body, details);
       });
@@ -101,6 +169,7 @@ class NotificationService {
       importance: Importance.defaultImportance,
       priority: Priority.defaultPriority,
     );
-    await _notifications.show(0, title, body, NotificationDetails(android: androidDetails));
+    await _notifications.show(
+        0, title, body, NotificationDetails(android: androidDetails));
   }
 }

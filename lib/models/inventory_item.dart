@@ -16,6 +16,8 @@ class InventoryItem {
   final String? notes;
   final String? brand;
   final String? photoPaths; // comma-separated paths for multi-photo
+  final int? reminderDaysBefore; // per-item reminder preference (null = global default)
+  final String? bestBeforeText; // raw OCR text e.g. "6 months from MFG"
 
   InventoryItem({
     this.id,
@@ -35,6 +37,8 @@ class InventoryItem {
     this.notes,
     this.brand,
     this.photoPaths,
+    this.reminderDaysBefore,
+    this.bestBeforeText,
   })  : addedDate = addedDate ?? DateTime.now(),
         updatedDate = updatedDate ?? DateTime.now();
 
@@ -84,6 +88,8 @@ class InventoryItem {
       'notes': notes,
       'brand': brand,
       'photo_paths': photoPaths,
+      'reminder_days_before': reminderDaysBefore,
+      'best_before_text': bestBeforeText,
     };
   }
 
@@ -114,6 +120,8 @@ class InventoryItem {
       notes: map['notes'] as String?,
       brand: map['brand'] as String?,
       photoPaths: map['photo_paths'] as String?,
+      reminderDaysBefore: map['reminder_days_before'] as int?,
+      bestBeforeText: map['best_before_text'] as String?,
     );
   }
 
@@ -135,6 +143,8 @@ class InventoryItem {
     String? notes,
     String? brand,
     String? photoPaths,
+    int? reminderDaysBefore,
+    String? bestBeforeText,
   }) {
     return InventoryItem(
       id: id ?? this.id,
@@ -154,6 +164,8 @@ class InventoryItem {
       notes: notes ?? this.notes,
       brand: brand ?? this.brand,
       photoPaths: photoPaths ?? this.photoPaths,
+      reminderDaysBefore: reminderDaysBefore ?? this.reminderDaysBefore,
+      bestBeforeText: bestBeforeText ?? this.bestBeforeText,
     );
   }
 }

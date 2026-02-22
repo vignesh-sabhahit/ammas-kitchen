@@ -8,8 +8,13 @@ import 'package:ammas_kitchen/data/shelf_life_data.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final InventoryItem item;
+  final bool editMode;
 
-  const ItemDetailScreen({super.key, required this.item});
+  const ItemDetailScreen({
+    super.key,
+    required this.item,
+    this.editMode = false,
+  });
 
   @override
   State<ItemDetailScreen> createState() => _ItemDetailScreenState();
@@ -17,14 +22,16 @@ class ItemDetailScreen extends StatefulWidget {
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late InventoryItem _item;
-  bool _isEditing = false;
+  late bool _isEditing;
   late TextEditingController _nameController;
   late TextEditingController _notesController;
+  int _currentPhotoPage = 0;
 
   @override
   void initState() {
     super.initState();
     _item = widget.item;
+    _isEditing = widget.editMode;
     _nameController = TextEditingController(text: _item.name);
     _notesController = TextEditingController(text: _item.notes ?? '');
   }
@@ -39,6 +46,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final expiryColor = _getExpiryColor(_item.expiryStatus);
+    final photos = _item.allPhotoPaths;
 
     return Scaffold(
       appBar: AppBar(
@@ -66,49 +74,80 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Photos (multi-photo support)
-            if (_item.allPhotoPaths.isNotEmpty)
+            // Photos with page indicator dots
+            if (photos.isNotEmpty)
               SizedBox(
                 height: 250,
-                child: _item.allPhotoPaths.length == 1
+                child: photos.length == 1
                     ? Container(
                         decoration: BoxDecoration(
                           image: DecorationImage(
-                            image: FileImage(File(_item.allPhotoPaths.first)),
+                            image: FileImage(File(photos.first)),
                             fit: BoxFit.cover,
                           ),
                         ),
                       )
-                    : PageView.builder(
-                        itemCount: _item.allPhotoPaths.length,
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.file(
-                                File(_item.allPhotoPaths[index]),
-                                fit: BoxFit.cover,
-                              ),
-                              Positioned(
-                                bottom: 8,
-                                right: 8,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: Colors.black54,
-                                    borderRadius: BorderRadius.circular(12),
+                    : Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          PageView.builder(
+                            itemCount: photos.length,
+                            onPageChanged: (i) =>
+                                setState(() => _currentPhotoPage = i),
+                            itemBuilder: (context, index) {
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Image.file(
+                                    File(photos[index]),
+                                    fit: BoxFit.cover,
                                   ),
-                                  child: Text(
-                                    index == 0 ? 'Front' : 'Back',
-                                    style: const TextStyle(
-                                        color: Colors.white, fontSize: 12),
+                                  Positioned(
+                                    bottom: 30,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        borderRadius:
+                                            BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        index == 0 ? 'Front' : 'Back',
+                                        style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          // Page indicator dots
+                          Positioned(
+                            bottom: 8,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(
+                                photos.length,
+                                (i) => Container(
+                                  width: 8,
+                                  height: 8,
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 3),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: _currentPhotoPage == i
+                                        ? Colors.white
+                                        : Colors.white54,
                                   ),
                                 ),
                               ),
-                            ],
-                          );
-                        },
+                            ),
+                          ),
+                        ],
                       ),
               )
             else if (_item.photoPath != null)
@@ -165,7 +204,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     decoration: BoxDecoration(
                       color: expiryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: expiryColor.withValues(alpha: 0.3)),
+                      border: Border.all(
+                          color: expiryColor.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       children: [
@@ -214,16 +254,37 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   const SizedBox(height: 20),
 
                   // Details grid
-                  _buildDetailRow('Category',
+                  _buildDetailRow(
+                      'Category',
                       '${categoryIcons[_item.category] ?? ''} ${categoryNames[_item.category] ?? _item.category}'),
-                  _buildDetailRow('Quantity',
+                  _buildDetailRow(
+                      'Quantity',
                       '${_item.quantity % 1 == 0 ? _item.quantity.toInt() : _item.quantity} ${_item.unit}'),
-                  _buildDetailRow('Location',
+                  _buildDetailRow(
+                      'Location',
                       '${locationIcons[_item.storageLocation] ?? ''} ${_item.storageLocation[0].toUpperCase()}${_item.storageLocation.substring(1)}'),
                   if (_item.brand != null && _item.brand!.isNotEmpty)
                     _buildDetailRow('Brand', _item.brand!),
-                  _buildDetailRow('Added',
-                      DateFormat('dd MMM yyyy, h:mm a').format(_item.addedDate)),
+
+                  // MFG Date
+                  if (_item.mfgDate != null || _isEditing)
+                    _buildDetailRow(
+                      'MFG Date',
+                      _item.mfgDate != null
+                          ? DateFormat('dd MMM yyyy').format(_item.mfgDate!)
+                          : 'Not set',
+                      editAction: _isEditing ? _pickMfgDate : null,
+                    ),
+
+                  // Best-before text
+                  if (_item.bestBeforeText != null &&
+                      _item.bestBeforeText!.isNotEmpty)
+                    _buildDetailRow('Best Before', _item.bestBeforeText!),
+
+                  _buildDetailRow(
+                      'Added',
+                      DateFormat('dd MMM yyyy, h:mm a')
+                          .format(_item.addedDate)),
                   if (_item.notes != null && _item.notes!.isNotEmpty)
                     _buildDetailRow('Notes', _item.notes!),
 
@@ -302,7 +363,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildDetailRow(String label, String value, {VoidCallback? editAction}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -312,18 +373,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             width: 100,
             child: Text(
               label,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(fontSize: 14),
-            ),
+            child: Text(value, style: const TextStyle(fontSize: 14)),
           ),
+          if (editAction != null)
+            IconButton(
+              icon: const Icon(Icons.edit, size: 16),
+              onPressed: editAction,
+              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              padding: EdgeInsets.zero,
+            ),
         ],
       ),
     );
@@ -368,13 +430,28 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Future<void> _pickExpiryDate() async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _item.expiryDate ?? DateTime.now().add(const Duration(days: 7)),
+      initialDate:
+          _item.expiryDate ?? DateTime.now().add(const Duration(days: 7)),
       firstDate: DateTime.now().subtract(const Duration(days: 30)),
       lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
     );
     if (picked != null) {
       setState(() {
         _item = _item.copyWith(expiryDate: picked);
+      });
+    }
+  }
+
+  Future<void> _pickMfgDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _item.mfgDate ?? DateTime.now(),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 3)),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) {
+      setState(() {
+        _item = _item.copyWith(mfgDate: picked);
       });
     }
   }

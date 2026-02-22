@@ -1,7 +1,7 @@
 name: ammas_kitchen
 description: "Kitchen inventory app for Amma - snap, track, never waste food"
 publish_to: 'none'
-version: 0.2.1+3
+version: 0.3.0+4
 
 environment:
   sdk: ^3.11.0
@@ -27,6 +27,11 @@ dependencies:
 
   # Notifications
   flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+  flutter_timezone: ^3.0.1
+
+  # Preferences
+  shared_preferences: ^2.3.4
 
   # Networking (for OTA updates)
   http: ^1.6.0

@@ -3,6 +3,8 @@ import 'package:ammas_kitchen/models/inventory_item.dart';
 import 'package:ammas_kitchen/services/database_service.dart';
 import 'package:ammas_kitchen/services/notification_service.dart';
 
+enum SortMode { byExpiry, byName, byDateAdded, byCategory }
+
 class InventoryProvider extends ChangeNotifier {
   List<InventoryItem> _items = [];
   List<InventoryItem> _filteredItems = [];
@@ -10,6 +12,7 @@ class InventoryProvider extends ChangeNotifier {
   String? _filterLocation;
   String? _filterCategory;
   bool _showExpiringOnly = false;
+  SortMode _sortMode = SortMode.byExpiry;
 
   List<InventoryItem> get items =>
       _searchQuery.isEmpty &&
@@ -32,6 +35,14 @@ class InventoryProvider extends ChangeNotifier {
   String? get filterLocation => _filterLocation;
   String? get filterCategory => _filterCategory;
   bool get showExpiringOnly => _showExpiringOnly;
+  SortMode get sortMode => _sortMode;
+
+  void setSortMode(SortMode mode) {
+    _sortMode = mode;
+    _items.sort(_getComparator());
+    _applyFilters();
+    notifyListeners();
+  }
 
   final DatabaseService _db = DatabaseService.instance;
 
@@ -45,7 +56,7 @@ class InventoryProvider extends ChangeNotifier {
     final id = await _db.insertItem(item);
     final newItem = item.copyWith(id: id);
     _items.add(newItem);
-    _items.sort(_sortByExpiry);
+    _items.sort(_getComparator());
     _applyFilters();
 
     // Schedule notification if item has expiry date
@@ -62,7 +73,7 @@ class InventoryProvider extends ChangeNotifier {
     final index = _items.indexWhere((i) => i.id == item.id);
     if (index != -1) {
       _items[index] = item;
-      _items.sort(_sortByExpiry);
+      _items.sort(_getComparator());
       _applyFilters();
     }
 
@@ -113,7 +124,7 @@ class InventoryProvider extends ChangeNotifier {
     final restored = await _db.undoDelete(item.id!);
     if (restored != null) {
       _items.add(restored);
-      _items.sort(_sortByExpiry);
+      _items.sort(_getComparator());
       _applyFilters();
 
       if (restored.expiryDate != null) {
@@ -160,9 +171,13 @@ class InventoryProvider extends ChangeNotifier {
 
   void _applyFilters() {
     _filteredItems = _items.where((item) {
-      if (_searchQuery.isNotEmpty &&
-          !item.name.toLowerCase().contains(_searchQuery.toLowerCase())) {
-        return false;
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        if (!item.name.toLowerCase().contains(q) &&
+            !(item.brand?.toLowerCase().contains(q) ?? false) &&
+            !item.category.toLowerCase().contains(q)) {
+          return false;
+        }
       }
       if (_filterLocation != null &&
           item.storageLocation != _filterLocation) {
@@ -181,10 +196,25 @@ class InventoryProvider extends ChangeNotifier {
     }).toList();
   }
 
-  int _sortByExpiry(InventoryItem a, InventoryItem b) {
-    if (a.expiryDate == null && b.expiryDate == null) return 0;
-    if (a.expiryDate == null) return 1;
-    if (b.expiryDate == null) return -1;
-    return a.expiryDate!.compareTo(b.expiryDate!);
+  Comparator<InventoryItem> _getComparator() {
+    switch (_sortMode) {
+      case SortMode.byExpiry:
+        return (a, b) {
+          if (a.expiryDate == null && b.expiryDate == null) return 0;
+          if (a.expiryDate == null) return 1;
+          if (b.expiryDate == null) return -1;
+          return a.expiryDate!.compareTo(b.expiryDate!);
+        };
+      case SortMode.byName:
+        return (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase());
+      case SortMode.byDateAdded:
+        return (a, b) => b.addedDate.compareTo(a.addedDate); // newest first
+      case SortMode.byCategory:
+        return (a, b) {
+          final cmp = a.category.compareTo(b.category);
+          if (cmp != 0) return cmp;
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        };
+    }
   }
 }
